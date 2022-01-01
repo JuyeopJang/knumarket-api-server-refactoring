@@ -1,0 +1,33 @@
+{
+  "name": "knumarket-auth-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuyeopJang/knumarket-auth-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JuyeopJang/knumarket-auth-server/issues"
+  },
+  "homepage": "https://github.com/JuyeopJang/knumarket-auth-server#readme",
+  "dependencies": {
+    "@types/body-parser": "^1.19.2",
+    "@types/csurf": "^1.11.2",
+    "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.6",
+    "@types/morgan": "^1.9.3",
+    "helmet": "^4.6.0",
+    "redis": "^4.0.1",
+    "typeorm": "^0.2.41"
+  },
+  "devDependencies": {
+    "@types/nodemon": "^1.19.1",
+    "artillery": "^2.0.0-9"
+  }
+}
