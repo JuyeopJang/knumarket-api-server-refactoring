@@ -1,11 +1,12 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
 
 @Entity()
 export class User {
 
-    @PrimaryGeneratedColumn()
-    user_uid: number;
+    @PrimaryGeneratedColumn('uuid')
+    user_uid: string;
 
+    @Index()
     @Column({ length: 50 })
     email: string;
 
@@ -15,7 +16,7 @@ export class User {
     @Column({ length: 20 })
     nickname: string;
 
-    @Column()
+    @Column({ default: false })
     is_verified: boolean;
 
     @Column()
