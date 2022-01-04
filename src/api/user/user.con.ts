@@ -2,19 +2,16 @@ import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
 import { BadRequestException, UnauthorizedException } from '../../common/exceptions/index';
 // import { wrap } from '../../lib/req-handler';
-import { UserService } from './user.serv';
+import UserService from "./user.serv";
 import { UserRepository } from './user.repo';
 
 export default class UserController implements ApiController {
-    path: string;
-    router: any;
-    userService: UserService;
+
+    path: string = "/users";
+    router: Router = Router();
+    userService = new UserService(new UserRepository());
 
     constructor() {
-        this.path = "/users";
-        this.router = Router();
-        this.userService = new UserService(new UserRepository());
-
         this.initializeRoutes();
     }
 
@@ -29,15 +26,22 @@ export default class UserController implements ApiController {
         this.router.use(this.path, routes);
     }
 
-    async signUp(req: Request, res: Response, next: NextFunction) {
+    signUp = async (req: Request, res: Response) => {
         const { email, password, nickname } = req.body;
 
         if (!email || !email.length) throw new BadRequestException("이메일이 없습니다.");
         if (!password || !password.length) throw new BadRequestException("비밀번호가 없습니다.");
         if (!nickname || !nickname.length) throw new BadRequestException("닉네임이 없습니다.");
         
-        await this.userService.signUp({ email, password, nickname });
+        try {
+            await this.userService.signUp({ email, password, nickname });
+        } catch (err) {
+            console.log(err);
+        }
         
+        res.status(201).json({
+            message: 'user created!'
+        });
     }
 
     // login(req: Request, res: Response, next: NextFunction) {

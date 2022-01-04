@@ -8,10 +8,13 @@ async function startServer() {
 
   const app = new App([
     new UserController(),
-    new ReportController()
+    // new ReportController()
   ]);
 
   app.listen();
-}
+  return app;
+};
 
-startServer();
+startServer()
+  .then(app => {
+  });

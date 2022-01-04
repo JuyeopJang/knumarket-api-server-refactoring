@@ -41,6 +41,5 @@
     "@types/supertest": "^2.0.11",
     "artillery": "^2.0.0-9",
     "jest": "^27.4.5"
-  },
-  "type": "module"
+  }
 }

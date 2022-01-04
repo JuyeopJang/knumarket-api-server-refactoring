@@ -4,6 +4,7 @@ import { createClient } from "redis";
 export const initializeDatabase = async () => {
     // mysql connection
     const connection: Connection = await createConnection();
+    console.log(connection);
     // redis connection
     const redisClient = createClient();
 

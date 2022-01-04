@@ -6,7 +6,7 @@ import { UserRepository } from './user.repo.js';
 import { UserDto } from '../interfaces/dto/UserDto.js';
 import { UserDao } from '../interfaces/dao/UserDao.js';
 
-export class UserService {
+export default class UserService {
   userRepository: UserRepository;
   constructor(userRepository) {
     this.userRepository = userRepository;
@@ -32,7 +32,7 @@ export class UserService {
 //     return this.userRepository.countByEmail(email);
 //   }
 
-  async signUp(userDto: UserDto) {
+  signUp = async (userDto: UserDto) => {
     // const { count: hasEmail } = this.countByEmail(email);
 
     // if (hasEmail) {
