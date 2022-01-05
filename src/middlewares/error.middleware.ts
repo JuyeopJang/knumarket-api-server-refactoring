@@ -1,10 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { ServerException } from "../common/exceptions";
+import { HttpException, ServerException } from "../common/exceptions";
 
-export const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
+export const errorMiddleware = (err: HttpException, req: Request, res: Response, next: NextFunction) => {
     if (err) {
-        console.log(err);
-        throw new ServerException();
+        res.status(err.status).json({
+            success: false,
+            response: null,
+            error: {
+                status: err.status,
+                message: err.message
+            }
+        })
     } else {
         next();
     }

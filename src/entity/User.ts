@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp} from "typeorm";
+import { IsEmail } from 'class-validator';
 
 @Entity()
 export class User {
@@ -8,6 +9,7 @@ export class User {
 
     @Index()
     @Column({ length: 50 })
+    @IsEmail()
     email: string;
 
     @Column({ length: 255 })
@@ -19,10 +21,10 @@ export class User {
     @Column({ default: false })
     is_verified: boolean;
 
-    @Column()
+    @Column({ default: () => 'CURRENT_TIMESTAMP '})
     created_at: Date;
     
-    @Column()
+    @Column({ default: () => 'CURRENT_TIMESTAMP '})
     updated_at: Date;
 
 }

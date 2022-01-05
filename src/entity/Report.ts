@@ -1,7 +1,7 @@
 import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
 
 @Entity()
-export class User {
+export class Report {
 
     @PrimaryGeneratedColumn()
     report_uid: string;
@@ -15,7 +15,7 @@ export class User {
     @Column()
     user_uid: string;
 
-    @Column()
+    @Column({ default: () => 'CURRENT_TIMESTAMP '})
     created_at: Date;
 
 }
