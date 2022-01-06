@@ -1,10 +1,10 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
-import { BadRequestException, HttpException, UnauthorizedException } from '../../common/exceptions/index';
-// import { wrap } from '../../lib/req-handler';
+import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
 import UserService from "./user.serv";
 import { UserRepository } from './user.repo';
-import { MetadataWithSuchNameAlreadyExistsError } from "typeorm";
+import { body, check, param, Result, ValidationError, validationResult } from "express-validator";
+
 
 export default class UserController implements ApiController {
 
@@ -20,48 +20,50 @@ export default class UserController implements ApiController {
         const routes = Router();
     
         routes
-          .post('/sign-up', this.signUp)
+          .post('/sign-up', [
+              check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
+              check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
+              check('nickname').isLength({ min: 4, max: 10}).withMessage('닉네임은 4자 이상 10자 이하의 문자열입니다.'), 
+            ], this.validationCheck, this.signUp);
         //   .post('/login', this.login)
         //   .get('/logout',  this.logout);
 
         this.router.use(this.path, routes);
     }
 
-    signUp = async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password, nickname } = req.body;
+    validationCheck = async (req: Request, res: Response, next: NextFunction) => {
+        const errors = validationResult(req);
 
-        if (!email || !email.length) {
-            next(new BadRequestException("이메일은 필수입니다."));
-            return;
-        }
-        if (!password || !password.length) {
-            next(new BadRequestException("비밀번호는 필수입니다."));
-            return;
-        }
-        if (!nickname || !nickname.length) {
-            next(new BadRequestException("닉네임은 필수입니다."));
-            return;
-        }
+        if (!errors.isEmpty()) {
+            const errorFormatter = ({ param, msg }: ValidationError) => {
+                return {
+                    param,
+                    msg
+                }    
+            };
+            
+            const result = errors.formatWith(errorFormatter);
 
-        // email을 통해 중복확인 먼저!
-        
-        try {
-            await this.userService.signUp({ email, password, nickname });
-        } catch (err) {
-            console.log(err);
+            next(new BadRequestException(result.array()));
+        } else {
+            next();
         }
-        
-        res.status(201).json({
-            message: 'user created!'
-        });
     }
 
-    // login(req: Request, res: Response, next: NextFunction) {
+    signUp = async (req: Request, res: Response, next: NextFunction) => {
+        
+        const { email, password, nickname } = req.body;
+        
+        try {
+            await this.userService.signUp(email, password, nickname);
 
-    // }
-
-    // logout(req: Request, res: Response, next: NextFunction) {
-
-    // }
-
+            res.status(201).json({
+                success: true,
+                response: '회원가입에 성공했습니다.',
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }    
+    }
 }

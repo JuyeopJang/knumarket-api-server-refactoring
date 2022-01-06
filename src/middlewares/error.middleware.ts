@@ -8,7 +8,8 @@ export const errorMiddleware = (err: HttpException, req: Request, res: Response,
             response: null,
             error: {
                 status: err.status,
-                message: err.message
+                message: err.message,
+                params: err.errors !== null ? err.errors : null
             }
         })
     } else {

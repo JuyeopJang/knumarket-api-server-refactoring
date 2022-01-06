@@ -1,24 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException } from '../../common/exceptions/index.js';
+import { BadRequestException } from '../../common/exceptions/';
 import crypto from 'crypto';
 // import * as jwt from '../../lib/jwt.js';
 import { UserRepository } from './user.repo.js';
-import { UserDto } from '../interfaces/dto/UserDto.js';
+// import { UserDto } from '../interfaces/dto/UserDto.js';
 import { UserDao } from '../interfaces/dao/UserDao.js';
+import { ConflictException } from '../../common/exceptions/conflict.exception';
 
 export default class UserService {
+
   userRepository: UserRepository;
-  constructor(userRepository) {
+    
+  constructor(userRepository: UserRepository) {
     this.userRepository = userRepository;
   }
-
-//   findById(id) {
-//     return this.userRepository.findById(id);
-//   }
-
-//   findByEmail(email) {
-//     return this.userRepository.findByEmail(email);
-//   }
 
   cryptoPassword(password: string): string {
     return crypto
@@ -27,51 +22,27 @@ export default class UserService {
       .digest('hex');
   }
     
+  async countByEmail(email: string) {
+    return this.userRepository.countByEmail(email);
+  }
 
-//   countByEmail(email: string) {
-//     return this.userRepository.countByEmail(email);
-//   }
+  signUp = async (email: string, password: string, nickname: string) => {
+    const hasEmail: number = +await this.countByEmail(email);
 
-  signUp = async (userDto: UserDto) => {
-    // const { count: hasEmail } = this.countByEmail(email);
-
-    // if (hasEmail) {
-    //   throw new BadRequestException('중복된 이메일이 있습니다.');
-    // }
+    if (hasEmail) {
+      throw new ConflictException('이미 존재하는 이메일입니다.');
+    }
 
     const user_uid: string = uuidv4();
-    const password: string = this.cryptoPassword(userDto.password);
+    const encryptedPassword: string = this.cryptoPassword(password);
 
     const userDao: UserDao = {
         user_uid: user_uid,
-        email: userDto.email,
-        password,
-        nickname: userDto.nickname
+        email,
+        password: encryptedPassword,
+        nickname
     };
 
     await this.userRepository.create(userDao);
   }
-
-//   async login({ email, password }) {
-//     const user = this.findByEmail(email);
-//     if (!user) {
-//       throw new BadRequestException(
-//         '이메일 또는 비밀번호를 다시 확인해 주세요.',
-//       );
-//     }
-
-//     const isValidPassword = await compare(password, user.password);
-//     if (!isValidPassword) {
-//       throw new BadRequestException(
-//         '이메일 또는 비밀번호를 다시 확인해 주세요.',
-//       );
-//     }
-
-//     const token = jwt.sign({
-//       user_id: user.id,
-//       email,
-//     });
-
-//     return [token, user.toJson()]
-//   }
 }
