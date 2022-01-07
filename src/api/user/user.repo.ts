@@ -16,6 +16,14 @@ export class UserRepository {
         return cnt;
     }
 
+    async findByEmail(email: string) {
+      return getConnection(node_env)
+        .getRepository(User)
+        .findOne({ where: {
+          email
+        }});
+    }
+
     async create(user: UserDao) {
         return getConnection(node_env)
           .createQueryBuilder()

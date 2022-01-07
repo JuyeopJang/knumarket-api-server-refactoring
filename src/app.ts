@@ -47,7 +47,7 @@ class App {
         });
     }
 
-    get getServer() {
+    getServer() {
         return this.app;
     }
 }

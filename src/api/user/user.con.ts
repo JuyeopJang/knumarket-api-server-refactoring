@@ -5,7 +5,6 @@ import UserService from "./user.serv";
 import { UserRepository } from './user.repo';
 import { body, check, param, Result, ValidationError, validationResult } from "express-validator";
 
-
 export default class UserController implements ApiController {
 
     path: string = "/users";
