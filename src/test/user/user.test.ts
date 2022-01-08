@@ -1,16 +1,16 @@
 import request from 'supertest';
 import { UserRepository } from '../../api/user/user.repo';
+import UserService from '../../api/user/user.serv';
 import { closeDatabase, initializeDatabase } from '../../lib/database';
+import { getMockUser, getWrongNicknameUser, getWrongPasswordUser } from '../lib/fake-data';
 import { getServer, expectResponseFailed, expectResponseSucceed, withHeadersBy, fetchHeaders } from '../lib/helper';
-// import { internet } from 'faker';
 
-beforeEach(async () => {
+beforeAll(async () => {
   await initializeDatabase();
 })
 
-afterEach(async () => {
+afterAll(async () => {
   await closeDatabase();
-  await initializeDatabase();
 })
 
 describe('UserController (e2e)', () => {
@@ -28,11 +28,7 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const params = {
-        email: 'zooyeop@gmail.com',
-        password: 'welcometohell!',
-        nickname: 'noahsgood'
-      };
+      const params = getMockUser();
 
       // when
       const res = await withHeaders(req.post(apiPath)).send(params).expect(201);
@@ -45,48 +41,66 @@ describe('UserController (e2e)', () => {
       expect(user.nickname).toEqual(params.nickname);
     });
 
-    // it('실패 - 이미 가입된 이메일 입니다. (400)', async () => {
-    //   // given
-    //   const headers = await fetchHeaders(req);
-    //   const withHeaders = withHeadersBy(headers);
+    it('실패 - 이미 가입된 이메일 입니다. (409)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-    //   const userRaw = mockUserRaw();
-    //   createUser(userRaw);
+      const mockUser = getMockUser();
+      
+      const res = await withHeaders(req.post(apiPath))
+        .send(mockUser).expect(409);
 
-    //   const params = {
-    //     email: userRaw.email,
-    //     name: internet.userName(),
-    //     password: internet.password(),
-    //   };
+      expectResponseFailed(res);
+    });
 
-    //   // when
-    //   const res = await withHeaders(req.post(apiPath)).send(params).expect(400);
+    it('실패 - 비밀번호는 6글자 이상 20자 이하 입니다. (400)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-    //   // then
-    //   expectResponseFailed(res);
-    // });
+      const wrongPasswordUser = getWrongPasswordUser('123438219748921738');
+      
+      // when
+      const res = await withHeaders(req.post(apiPath))
+        .send(wrongPasswordUser)
+        .expect(400);
 
-    // it('실패 - 비밀번호는 최소 8글자 입니다. (400)', async () => {
-    //   // given
-    //   const headers = await fetchHeaders(req);
-    //   const withHeaders = withHeadersBy(headers);
+      // then
+      expectResponseFailed(res);
+    });
 
-    //   const userRaw = mockUserRaw();
+    it('실패 - 닉네임은 2글자 이상 10자 이하 입니다. (400)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-    //   const params = {
-    //     email: userRaw.email,
-    //     name: internet.userName(),
-    //     password: 'passwd',
-    //   };
+      const wrongNicknameUser = getWrongNicknameUser('L');
+      
+      // when
+      const res = await withHeaders(req.post(apiPath))
+        .send(wrongNicknameUser)
+        .expect(400);
 
-    //   // when
-    //   const res = await withHeaders(req.post('/api/users/login'))
-    //     .send(params)
-    //     .expect(400);
+      // then
+      expectResponseFailed(res);
+    });
 
-    //   // then
-    //   expectResponseFailed(res);
-    // });
+    it('실패 - 이메일 형식에 맞지 않습니다. (400)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
+
+      const wrongEmailUser = getWrongPasswordUser('hi@');
+      
+      // when
+      const res = await withHeaders(req.post(apiPath))
+        .send(wrongEmailUser)
+        .expect(400);
+
+      // then
+      expectResponseFailed(res);
+    });
   });
 
   // describe('로그인: POST /api/users/login', () => {

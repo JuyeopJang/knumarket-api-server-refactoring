@@ -22,7 +22,7 @@ export default class UserController implements ApiController {
           .post('/sign-up', [
               check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
               check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-              check('nickname').isLength({ min: 4, max: 10}).withMessage('닉네임은 4자 이상 10자 이하의 문자열입니다.'), 
+              check('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
             ], this.validationCheck, this.signUp);
         //   .post('/login', this.login)
         //   .get('/logout',  this.logout);
@@ -50,11 +50,8 @@ export default class UserController implements ApiController {
     }
 
     signUp = async (req: Request, res: Response, next: NextFunction) => {
-        
-        const { email, password, nickname } = req.body;
-        
         try {
-            await this.userService.signUp(email, password, nickname);
+            await this.userService.signUp(req.body);
 
             res.status(201).json({
                 success: true,

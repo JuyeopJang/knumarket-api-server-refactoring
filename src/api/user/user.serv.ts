@@ -26,21 +26,21 @@ export default class UserService {
     return this.userRepository.countByEmail(email);
   }
 
-  signUp = async (email: string, password: string, nickname: string) => {
-    const hasEmail: number = +await this.countByEmail(email);
+  signUp = async (user: { email: string, password: string, nickname: string }) => {
+    const hasEmail: number = +await this.countByEmail(user.email);
 
     if (hasEmail) {
       throw new ConflictException('이미 존재하는 이메일입니다.');
     }
 
     const user_uid: string = uuidv4();
-    const encryptedPassword: string = this.cryptoPassword(password);
+    const encryptedPassword: string = this.cryptoPassword(user.password);
 
     const userDao: UserDao = {
-        user_uid: user_uid,
-        email,
+        user_uid,
+        email: user.email,
         password: encryptedPassword,
-        nickname
+        nickname: user.nickname
     };
 
     await this.userRepository.create(userDao);
