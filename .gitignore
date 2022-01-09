@@ -5,3 +5,4 @@ ormconfig.json
 .DS_Store
 config.ts
 /dist
+.coveralls.yml
