@@ -2,6 +2,5 @@ node_modules
 ormconfig.json
 .env
 .DS_Store
-config.ts
 /dist
 .coveralls.yml
