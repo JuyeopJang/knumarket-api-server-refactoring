@@ -12,13 +12,13 @@ on:
 jobs:
   build:
     env:
-    JWT_SECRET: ${{ secrets.JWT_SECRET }}
-    NODE_ENV: ${{ secrets.NODE_ENV }}
-    DB: ${{ secrets.DB }}
-    DB_HOST: ${{ secrets.DB_HOST }}
-    DB_PORT: ${{ secrets.DB_PORT }}
-    DB_USER: ${{ secrets.DB_USER }}
-    DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      DB: ${{ secrets.DB }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     runs-on: ubuntu-latest
 
