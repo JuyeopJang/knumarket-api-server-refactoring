@@ -10,7 +10,8 @@ on:
     branches: [ main ]
 
 jobs:
-  env:
+  build:
+    env:
     JWT_SECRET: ${{ secrets.JWT_SECRET }}
     NODE_ENV: ${{ secrets.NODE_ENV }}
     DB: ${{ secrets.DB }}
@@ -18,8 +19,6 @@ jobs:
     DB_PORT: ${{ secrets.DB_PORT }}
     DB_USER: ${{ secrets.DB_USER }}
     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    
-  build:
 
     runs-on: ubuntu-latest
 
