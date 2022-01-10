@@ -27,14 +27,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: Generate Environment Variables
-        run: |
-          echo "JWT_SECRET=$JWT_SECRET" >> .env.JWT_SECRET
-          echo "NODE_ENV=$NODE_ENV" >> .env.NODE_ENV
-          echo "DB=$DB" >> .env.DB
-          echo "DB_HOST=$DB_HOST" >> .env.DB_HOST
-          echo "DB_PORT=$DB_PORT" >> .env.DB_PORT
-          echo "DB_USER=$DB_USER" >> .env.DB_USER
-          echo "DB_PASSWORD" >> .env.DB_PASSWORD
+        # run: |
+        #   echo "JWT_SECRET=$JWT_SECRET" >> .env.JWT_SECRET
+        #   echo "NODE_ENV=$NODE_ENV" >> .env.NODE_ENV
+        #   echo "DB=$DB" >> .env.DB
+        #   echo "DB_HOST=$DB_HOST" >> .env.DB_HOST
+        #   echo "DB_PORT=$DB_PORT" >> .env.DB_PORT
+        #   echo "DB_USER=$DB_USER" >> .env.DB_USER
+        #   echo "DB_PASSWORD" >> .env.DB_PASSWORD
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NODE_ENV: ${{ secrets.NODE_ENV }}
