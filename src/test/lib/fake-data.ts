@@ -1,20 +1,43 @@
-export const getMockUser = () => {
-    return {
-        email: 'zooyeop@gmail.com', // 이메일 형식
-        password: 'welcometohell!', // 6 ~ 20
-        nickname: 'noahsgood' // 4 ~ 10
-    };
-};
+export class LoginFakeUser {
+    private email: string;
+    private password: string;
 
-export const getWrongPasswordUser = (wrongPassword: string) => {
-    return getMockUser().password = wrongPassword;
+    constructor() {
+        this.email = 'zooyeop@gmail.com';
+        this.password = 'welcometohell!';
+    }
+
+    public getEmail() {
+        return this.email;
+    }
+    
+    public setEmail(email: string) {
+        this.email = email;
+    }
+    
+    public getPassword() {
+        return this.password;
+    }
+    
+    public setPassword(password: string) {
+        this.password = password;
+    }
+    
 }
 
-export const getWrongNicknameUser = (wrongNickname: string) => {
-    return getMockUser().nickname = wrongNickname;
-}
+export class SignUpFakeUser extends LoginFakeUser {
+    private nickname: string;
+    
+    constructor() {
+        super();
+        this.nickname = 'noahsgood';
+    }
 
-export const getWrongEmailUser = (wrongEmail: string) => {
-    return getMockUser().email = wrongEmail;
-}
+    public getNickname() {
+        return this.nickname;
+    }
 
+    public setNickname(nickname: string) {
+        this.nickname = nickname;
+    }
+}

@@ -9,18 +9,18 @@ export const initializeDatabase = async () => {
     // mysql connection
     connection = await createConnection(node_env);
     // redis connection
-    // redisClient = createClient();
+    redisClient = createClient();
 
-    // redisClient.on('error', (err) => console.log('Redis Client Error', err));
+    redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
-    // await redisClient.connect();
+    await redisClient.connect();
 };
 
 export const closeDatabase = async () => {
     if (connection) {
         await connection.close();
     }
-    // if (redisClient) {
-    //     await redisClient.quit();
-    // }
+    if (redisClient) {
+        await redisClient.quit();
+    }
 }

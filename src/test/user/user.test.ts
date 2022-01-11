@@ -1,8 +1,10 @@
 import request from 'supertest';
 import { UserRepository } from '../../api/user/user.repo';
 import UserService from '../../api/user/user.serv';
-import { closeDatabase, initializeDatabase } from '../../lib/database';
-import { getMockUser, getWrongNicknameUser, getWrongPasswordUser } from '../lib/fake-data';
+import { closeDatabase, initializeDatabase, redisClient } from '../../lib/database';
+import { jwtVerify } from '../../lib/jwt';
+import { getRefreshToken } from '../../lib/redis';
+import { LoginFakeUser, SignUpFakeUser } from '../lib/fake-data';
 import { getServer, expectResponseFailed, expectResponseSucceed, withHeadersBy, fetchHeaders } from '../lib/helper';
 
 beforeAll(async () => {
@@ -28,7 +30,7 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const params = getMockUser();
+      const params = new SignUpFakeUser();
 
       // when
       const res = await withHeaders(req.post(apiPath)).send(params).expect(201);
@@ -36,9 +38,9 @@ describe('UserController (e2e)', () => {
       // then
       expectResponseSucceed(res);
 
-      const user = await userRepository.findByEmail(params.email);
+      const user = await userRepository.findByEmail(params.getEmail());
       expect(user).not.toBeUndefined();
-      expect(user.nickname).toEqual(params.nickname);
+      expect(user.nickname).toEqual(params.getNickname());
     });
 
     it('실패 - 이미 가입된 이메일 입니다. (409)', async () => {
@@ -46,7 +48,7 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const mockUser = getMockUser();
+      const mockUser = new SignUpFakeUser();
       
       const res = await withHeaders(req.post(apiPath))
         .send(mockUser).expect(409);
@@ -59,11 +61,13 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const wrongPasswordUser = getWrongPasswordUser('123438219748921738');
+      const mockUser = new SignUpFakeUser();
+
+      mockUser.setPassword('123');
       
       // when
       const res = await withHeaders(req.post(apiPath))
-        .send(wrongPasswordUser)
+        .send(mockUser)
         .expect(400);
 
       // then
@@ -75,11 +79,13 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const wrongNicknameUser = getWrongNicknameUser('L');
+      const mockUser = new SignUpFakeUser();
+
+      mockUser.setNickname('mynameisnoah');
       
       // when
       const res = await withHeaders(req.post(apiPath))
-        .send(wrongNicknameUser)
+        .send(mockUser)
         .expect(400);
 
       // then
@@ -91,11 +97,12 @@ describe('UserController (e2e)', () => {
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 
-      const wrongEmailUser = getWrongPasswordUser('hi@');
+      const mockUser = new SignUpFakeUser();
+      mockUser.setEmail('hi@');
       
       // when
       const res = await withHeaders(req.post(apiPath))
-        .send(wrongEmailUser)
+        .send(mockUser)
         .expect(400);
 
       // then
@@ -103,67 +110,81 @@ describe('UserController (e2e)', () => {
     });
   });
 
-  // describe('로그인: POST /api/users/login', () => {
-  //   const apiPath = `${rootApiPath}/login`;
+  describe('로그인: POST /api/users/login', () => {
+    const apiPath = `${rootApiPath}/login`;
 
-  //   it('성공 - 로그인 (200)', async () => {
-  //     // given
-  //     const headers = await fetchHeaders(req);
-  //     const withHeaders = withHeadersBy(headers);
+    it('성공 - 로그인 (200)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //     const userRaw = mockUserRaw();
-  //     createUser(userRaw);
+      const mockUser = new LoginFakeUser();
 
-  //     const params = {
-  //       email: userRaw.email,
-  //       password: userRaw.password,
-  //     };
+      // when
+      const res = await withHeaders(req.post(apiPath)).send(mockUser).expect(200);
 
-  //     // when
-  //     const res = await withHeaders(req.post(apiPath)).send(params).expect(200);
+      // then
+      expectResponseSucceed(res);
 
-  //     // then
-  //     expectResponseSucceed(res);
+      const result = res.body.response;
 
-  //     const result = res.body.response;
-  //     expect(result.token).toBeTruthy();
+      const decoded = [jwtVerify(result.access_token), jwtVerify(result.refresh_token)];
+      
+      expect(decoded[0]).toHaveProperty('email', mockUser.getEmail());
+      expect(decoded[1]).toHaveProperty('email', mockUser.getEmail());
 
-  //     const decoded = verify(result.token);
-  //     expect(decoded).toHaveProperty('user_id', userRaw.id);
-  //     expect(decoded).toHaveProperty('email', userRaw.email);
+      expect(await getRefreshToken(mockUser.getEmail())).toEqual(result.refresh_token);
+    });
 
-  //     expect(result.user).toEqual(User.fromJson(userRaw).toJson());
-  //   });
+    it('실패 - 이메일 또는 비밀번호가 일치하지 않습니다. (401)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //   it('실패 - 이메일은 필수입니다. (400)', async () => {
-  //     // given
-  //     const headers = await fetchHeaders(req);
-  //     const withHeaders = withHeadersBy(headers);
+      const mockUser = new LoginFakeUser();
+      mockUser.setEmail('hello@naver.com');
+      // when
+      const res = await withHeaders(req.post(apiPath)).send(mockUser).expect(401);
 
-  //     // when
-  //     const res = await withHeaders(req.post(apiPath)).expect(400);
+      // then
+      expectResponseFailed(res);
+    });
+    
+    it('실패 - 비밀번호는 6글자 이상 20자 이하 입니다. (400)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
+      const mockUser = new LoginFakeUser();
 
-  //   it('실패 - 비밀번호는 최소 8글자 입니다. (400)', async () => {
-  //     // given
-  //     const headers = await fetchHeaders(req);
-  //     const withHeaders = withHeadersBy(headers);
-  //     const userRaw = mockUserRaw();
+      mockUser.setPassword('231271231923829013821387');
+      
+      // when
+      const res = await withHeaders(req.post(apiPath))
+        .send(mockUser)
+        .expect(400);
 
-  //     const params = {
-  //       email: userRaw.email,
-  //       password: 'passwd',
-  //     };
+      // then
+      expectResponseFailed(res);
+    });
 
-  //     // when
-  //     const res = await withHeaders(req.post(apiPath)).send(params).expect(400);
+    it('실패 - 이메일 형식에 맞지 않습니다. (400)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
+      const mockUser = new LoginFakeUser();
+      mockUser.setEmail('hi@gmail..com');
+      
+      // when
+      const res = await withHeaders(req.post(apiPath))
+        .send(mockUser)
+        .expect(400);
+
+      // then
+      expectResponseFailed(res);
+    });
+  });
 
   //   it('실패 - 인증이 필요합니다. (401) #중복 로그인', async () => {
   //     // given

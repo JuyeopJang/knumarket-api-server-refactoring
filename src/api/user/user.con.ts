@@ -20,11 +20,14 @@ export default class UserController implements ApiController {
     
         routes
           .post('/sign-up', [
-              check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
-              check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-              check('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
-            ], this.validationCheck, this.signUp);
-        //   .post('/login', this.login)
+            check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
+            check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
+            check('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
+           ], this.validationCheck, this.signUp)
+          .post('/login', [
+            check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
+            check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
+           ], this.validationCheck, this.login);
         //   .get('/logout',  this.logout);
 
         this.router.use(this.path, routes);
@@ -61,5 +64,25 @@ export default class UserController implements ApiController {
         } catch (err) {
             next(err);
         }    
+    }
+
+    login = async (req: Request, res: Response, next: NextFunction) => {
+        const { email, password } = req.body;
+
+        try {
+            const [accessToken, refreshToken] = await this.userService.getTokens(email, password);
+
+            res.status(200).json({
+                success: true,
+                response: {
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                },
+                error: null
+            });
+        } catch (err) {
+            console.log(err);
+            next(err);
+        }
     }
 }

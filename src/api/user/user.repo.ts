@@ -33,4 +33,17 @@ export class UserRepository {
           .execute();
     }
 
+    async selectUserByEmailAndPassword(email: string, password: string) {
+      const { cnt } = await getConnection(node_env)
+        .createQueryBuilder()
+        .select("COUNT(user.user_uid) AS cnt")
+        .from(User, "user")
+        .where("user.email = :email", { email })
+        .andWhere("user.password = :password", { password })
+        .getRawOne();
+
+      return cnt;
+    }
+
+    
 }

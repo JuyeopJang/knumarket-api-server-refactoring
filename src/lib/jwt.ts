@@ -1,14 +1,11 @@
 import * as jwt from 'jsonwebtoken';
 import { jwtSecret } from '../config';
 
-export const jwtSign = (payload, options?) => {
+export const jwtSign = (payload, expiresIn, options?) => {
     return jwt.sign(payload, jwtSecret, {
         algorithm: 'HS256',
-        expiresIn: '1d',
+        expiresIn: expiresIn,
         ...options,
-    }, (err: Error, encoded: string) => {
-        if (err) console.error(err);
-        else return encoded
     });
 }
 

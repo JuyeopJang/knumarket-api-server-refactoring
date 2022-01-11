@@ -1,11 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException } from '../../common/exceptions/';
+import { BadRequestException, UnauthorizedException } from '../../common/exceptions/';
 import crypto from 'crypto';
 // import * as jwt from '../../lib/jwt.js';
 import { UserRepository } from './user.repo.js';
-// import { UserDto } from '../interfaces/dto/UserDto.js';
 import { UserDao } from '../interfaces/dao/UserDao.js';
 import { ConflictException } from '../../common/exceptions/conflict.exception';
+import { jwtSign } from '../../lib/jwt';
+import { setRefreshToken } from '../../lib/redis';
+import { token } from 'morgan';
 
 export default class UserService {
 
@@ -26,6 +28,12 @@ export default class UserService {
     return this.userRepository.countByEmail(email);
   }
 
+  async countByEmailAndPassword(email: string, password: string) {
+    const encryptedPassword: string = this.cryptoPassword(password);
+    const isExist = await this.userRepository.selectUserByEmailAndPassword(email, encryptedPassword); 
+    return +isExist;
+  }
+
   signUp = async (user: { email: string, password: string, nickname: string }) => {
     const hasEmail: number = +await this.countByEmail(user.email);
 
@@ -44,5 +52,21 @@ export default class UserService {
     };
 
     await this.userRepository.create(userDao);
+  }
+
+  getTokens = async (email: string, password: string) => {
+    const isExistUser = await this.countByEmailAndPassword(email, password);
+    let tokens: string[] = [];
+
+    if (!isExistUser) {
+      throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
+    }
+
+    tokens.push(jwtSign({ email }, '14d', {}));
+    tokens.push(jwtSign({ email }, '14d', {}));
+
+    setRefreshToken(email, tokens[1]);
+
+    return tokens;
   }
 }
