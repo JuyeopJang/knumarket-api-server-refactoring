@@ -81,8 +81,29 @@ export default class UserController implements ApiController {
                 error: null
             });
         } catch (err) {
-            console.log(err);
             next(err);
         }
     }
+
+    getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+        // 파라미터: 토큰
+        // 액세스 토큰 인증 후 -> 이메일로 유저를 찾아 정보 반환
+    }
+
+    updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+        // 파라미터: 토큰
+        // 액세스 토큰 인증 후 -> 이메일로 유저 정보 변경
+    }
+
+    withdrawlMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+        // 파라미터: 토큰
+        // 액세스 토큰 인증 후 -> 이메일로 회원 탈퇴
+    }
+
+    reissueToken = async (req: Request, res: Response, next: NextFunction) => {
+        // 액세스 토큰 재발급
+        // 1. accessToken 만료, refreshToken 유효 -> 액세스토큰 재발급
+        // 2. accessToken 만료, refreshToken 만료 -> 재로그인
+    }
+
 }
