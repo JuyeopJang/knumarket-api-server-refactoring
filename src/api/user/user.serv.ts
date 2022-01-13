@@ -8,6 +8,7 @@ import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
 import { setRefreshToken } from '../../lib/redis';
 import { token } from 'morgan';
+import { isEmail } from 'class-validator';
 
 export default class UserService {
 
@@ -62,11 +63,15 @@ export default class UserService {
       throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    tokens.push(jwtSign({ email }, '14d', {}));
+    tokens.push(jwtSign({ email }, '1d', {}));
     tokens.push(jwtSign({ email }, '14d', {}));
 
     setRefreshToken(email, tokens[1]);
 
     return tokens;
+  }
+
+  getMyInfo = async (email: string) => {
+    return this.userRepository.findByEmail(email);
   }
 }

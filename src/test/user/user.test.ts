@@ -186,106 +186,51 @@ describe('UserController (e2e)', () => {
     });
   });
 
-  //   it('실패 - 인증이 필요합니다. (401) #중복 로그인', async () => {
-  //     // given
-  //     const userRaw = mockUserRaw();
-  //     const headers = await fetchUserTokenAndHeaders(req, userRaw);
-  //     const withHeaders = withHeadersBy(headers);
+  describe('개인 정보 조회: GET /api/users/me', () => {
+    const loginPath = `${rootApiPath}/login`
+    const apiPath = `${rootApiPath}/me`;
 
-  //     await fetchUserTokenAndHeaders(req, userRaw);
+    it('성공 - 개인 정보 조회 (200)', async () => {
+      // login
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //     // when
-  //     const res = await withHeaders(req.get(`${rootApiPath}/me`)).expect(401);
+      const mockUser = new LoginFakeUser();
 
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-  // });
+      const res = await withHeaders(req.post(loginPath)).send(mockUser).expect(200);
+      const { access_token } = res.body.response;
 
-  // describe('내 정보 조회: GET /api/users/me', () => {
-  //   const apiPath = `${rootApiPath}/me`;
+      // get myinfo
 
-  //   it('성공 - 내 정보 조회 (200)', async () => {
-  //     // given
-  //     const userRaw = mockUserRaw();
-  //     const headers = await fetchUserTokenAndHeaders(req, userRaw);
-  //     const withHeaders = withHeadersBy(headers);
+      const myInfo = await withHeaders(req.get(apiPath)).set('authorization', access_token).expect(200);
 
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(200);
+      expect(myInfo.body.response).toHaveProperty('email');
+      expect(myInfo.body.response).toHaveProperty('nickname');
+      expect(myInfo.body.response).toHaveProperty('is_verified');
+    });
 
-  //     // then
-  //     expectResponseSucceed(res);
+    it('실패 - 토큰이 유효하지 않습니다. (401)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //     const result = res.body.response;
+      const res = await withHeaders(req.get(apiPath)).set('authorization', 'dksaekjriwh.dasjdhjasd.dsakdaskjds').expect(401);
 
-  //     expect(result.user).toEqual(User.fromJson(userRaw).toJson());
-  //   });
+      expect(res.body.error).toHaveProperty('status', 401);
+      expect(res.body.error).toHaveProperty('message', '토큰이 유효하지 않습니다.');
+    });
+    
+    it('실패 - 토큰이 존재하지 않습니다. (401)', async () => {
+      // given
+      const headers = await fetchHeaders(req);
+      const withHeaders = withHeadersBy(headers);
 
-  //   it('실패 - 인증이 필요합니다. (401)', async () => {
-  //     // given
-  //     const headers = await fetchUserTokenAndHeaders(req);
-  //     const withHeaders = withHeadersBy(headers, { token: false });
+      const res = await withHeaders(req.get(apiPath)).set('authorization', '').expect(400);
 
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(401);
-
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-
-  //   it('실패 - 인증이 필요합니다. (401) #쿠키 없이 요청', async () => {
-  //     // given
-  //     const headers = await fetchUserTokenAndHeaders(req);
-  //     const withHeaders = withHeadersBy(headers, { cookie: false });
-
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(401);
-
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-
-  //   it('실패 - 인증 정보와 세션 정보가 다릅니다. (403)', async () => {
-  //     // given
-  //     const headers1 = await fetchUserTokenAndHeaders(req);
-  //     const headers2 = await fetchUserTokenAndHeaders(req);
-  //     headers1.cookie = headers2.cookie;
-  //     const withHeaders = withHeadersBy(headers1);
-
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(403);
-
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-
-  //   it('실패 - CSRF 토큰이 유효하지 않습니다. (403) #empty header', async () => {
-  //     // given
-  //     const headers = await fetchUserTokenAndHeaders(req);
-  //     const withHeaders = withHeadersBy(headers, { csrfToken: false });
-
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(403);
-
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-
-  //   it('실패 - CSRF 토큰이 유효하지 않습니다. (403) #invalid csrf token', async () => {
-  //     // given
-  //     const headers = await fetchUserTokenAndHeaders(req);
-  //     headers.csrfToken = 'invalid csrf token';
-
-  //     const withHeaders = withHeadersBy(headers);
-
-  //     // when
-  //     const res = await withHeaders(req.get(apiPath)).expect(403);
-
-  //     // then
-  //     expectResponseFailed(res);
-  //   });
-  // });
+      expect(res.body.error).toHaveProperty('status', 400);
+      expect(res.body.error).toHaveProperty('message', 'req header에 authorization이 존재하지 않습니다.');
+    });
+  });
 });
 
 

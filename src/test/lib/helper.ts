@@ -47,7 +47,7 @@ export async function fetchHeaders(req) {
 
 export function setHeaders(req, headers, options) {
     if (headers.token && !(typeof options.token !== 'undefined' && !options.token)) {
-        req.auth(headers.token, { type: 'bearer' });
+      req.auth(headers.token, { type: 'bearer' });
     }
     return req;
 }

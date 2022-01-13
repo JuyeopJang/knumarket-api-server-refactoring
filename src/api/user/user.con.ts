@@ -3,7 +3,9 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
 import UserService from "./user.serv";
 import { UserRepository } from './user.repo';
-import { body, check, param, Result, ValidationError, validationResult } from "express-validator";
+import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
+import { jwtVerify } from '../../lib/jwt';
+import { isAuthorized } from "../../middlewares/auth.middleware";
 
 export default class UserController implements ApiController {
 
@@ -20,15 +22,15 @@ export default class UserController implements ApiController {
     
         routes
           .post('/sign-up', [
-            check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
-            check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-            check('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
-           ], this.validationCheck, this.signUp)
+              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
+              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
+              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
+            ], this.validationCheck, this.signUp)
           .post('/login', [
-            check('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
-            check('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
-           ], this.validationCheck, this.login);
-        //   .get('/logout',  this.logout);
+              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
+              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
+            ], this.validationCheck, this.login)
+          .get('/me', this.getMyInfo);
 
         this.router.use(this.path, routes);
     }
@@ -86,8 +88,23 @@ export default class UserController implements ApiController {
     }
 
     getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        // 파라미터: 토큰
-        // 액세스 토큰 인증 후 -> 이메일로 유저를 찾아 정보 반환
+        try {
+            const email = isAuthorized(req, res, next);
+
+            const userInfo = await this.userService.getMyInfo(email);
+
+            res.status(200).json({
+                success: true,
+                response: {
+                    email: userInfo.email,
+                    nickname: userInfo.nickname,
+                    is_verified: userInfo.is_verified
+                },
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }
     }
 
     updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
