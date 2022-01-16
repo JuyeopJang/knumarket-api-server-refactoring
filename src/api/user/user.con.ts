@@ -24,13 +24,17 @@ export default class UserController implements ApiController {
           .post('/sign-up', [
               check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
               check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.'), 
+              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.') 
             ], this.validationCheck, this.signUp)
           .post('/login', [
               check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
               check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
             ], this.validationCheck, this.login)
-          .get('/me', this.getMyInfo);
+          .get('/me', this.getMyInfo)
+          .put('/me', [
+              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
+            ], this.validationCheck, this.updateMyInfo);
+        //   .delete('/me', this.withdrawlMyInfo)
 
         this.router.use(this.path, routes);
     }
@@ -108,13 +112,44 @@ export default class UserController implements ApiController {
     }
 
     updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        // 파라미터: 토큰
-        // 액세스 토큰 인증 후 -> 이메일로 유저 정보 변경
+        const { nickname } = req.body;
+        
+        try {
+            const email = isAuthorized(req, res, next);
+
+            await this.userService.updateMyInfo(email, nickname);
+
+            res.status(200).json({
+                success: true,
+                response: {
+                    nickname
+                },
+                error: null
+            });
+
+        } catch (err) {
+            next(err);
+        }
     }
 
     withdrawlMyInfo = async (req: Request, res: Response, next: NextFunction) => {
         // 파라미터: 토큰
         // 액세스 토큰 인증 후 -> 이메일로 회원 탈퇴
+        
+        try {
+            const email = isAuthorized(req, res, next);
+
+            await this.userService.signOut(email);
+
+            res.status(200).json({
+                success: true,
+                response: '성공적으로 회원탈퇴 되었습니다.',
+                error: null
+            });
+
+        } catch (err) {
+            next(err);
+        }
     }
 
     reissueToken = async (req: Request, res: Response, next: NextFunction) => {

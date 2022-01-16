@@ -22,7 +22,9 @@ module.exports = [
           },
           "synchronize": true,
           "entities": ["src/entity/**/*.ts"],
-          "dropSchema": true
+          "dropSchema": true,
+          "logging": ["error"],
+          "maxQueryExecutionTime"
         },
         {
           "name": "production",

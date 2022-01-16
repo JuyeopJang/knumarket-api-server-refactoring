@@ -74,4 +74,8 @@ export default class UserService {
   getMyInfo = async (email: string) => {
     return this.userRepository.findByEmail(email);
   }
+
+  updateMyInfo = async (email: string, nickname: string) => {
+    return this.userRepository.updateNicknameByEmail(email, nickname)
+  }
 }

@@ -45,5 +45,14 @@ export class UserRepository {
       return cnt;
     }
 
+    async updateNicknameByEmail(email: string, nickname: string) {
+      return getConnection(node_env)
+        .createQueryBuilder()
+        .update(User)
+        .set({ nickname })
+        .where("email = :email", { email })
+        .execute();
+    }
+
     
 }

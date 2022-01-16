@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn} from "typeorm";
 import { IsEmail } from 'class-validator';
 
 @Entity()
@@ -27,4 +27,6 @@ export class User {
     @Column({ default: () => 'CURRENT_TIMESTAMP '})
     updated_at: Date;
 
+    @DeleteDateColumn()
+    deleted_at: Date;
 }
