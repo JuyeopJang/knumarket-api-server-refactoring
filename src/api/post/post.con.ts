@@ -1,17 +1,19 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
 import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
-import UserService from "./user.serv";
-import { UserRepository } from './user.repo';
+// import UserService from "./user.serv";
+// import { UserRepository } from './user.repo';
 import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
 import { jwtVerify } from '../../lib/jwt';
 import { isAuthorized } from "../../middlewares/auth.middleware";
+import { PostRepository } from "./post.repo";
+import { PostService } from "./post.serv";
 
-export default class UserController implements ApiController {
+export default class PostController implements ApiController {
 
-    path: string = "/users";
+    path: string = "/posts";
     router: Router = Router();
-    userService = new UserService(new UserRepository());
+    postService = new PostService(new PostRepository());
 
     constructor() {
         this.initializeRoutes();
@@ -34,8 +36,7 @@ export default class UserController implements ApiController {
           .put('/me', [
               check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
             ], this.validationCheck, this.updateMyInfo)
-          .delete('/me', this.withdrawlMyInfo)
-          .get('/token', this.reissueToken);
+          .delete('/me', this.withdrawlMyInfo);
 
         this.router.use(this.path, routes);
     }

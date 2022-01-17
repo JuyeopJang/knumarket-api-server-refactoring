@@ -5,7 +5,7 @@ import { node_env } from '../../config';
 
 export class UserRepository {
     
-    async countByEmail(email: string) {
+  countByEmail = async (email: string) => {
         const { cnt } = await getConnection(node_env)
           .createQueryBuilder()
           .select("COUNT(user.user_uid) AS cnt")
@@ -16,7 +16,7 @@ export class UserRepository {
         return cnt;
     }
 
-    async findByEmail(email: string) {
+    findByEmail = async (email: string) => {
       return getConnection(node_env)
         .getRepository(User)
         .findOne({ where: {
@@ -24,7 +24,7 @@ export class UserRepository {
         }});
     }
 
-    async create(user: UserDao) {
+    create = async (user: UserDao) => {
         return getConnection(node_env)
           .createQueryBuilder()
           .insert()
@@ -33,19 +33,19 @@ export class UserRepository {
           .execute();
     }
 
-    async selectUserByEmailAndPassword(email: string, password: string) {
-      const { cnt } = await getConnection(node_env)
+    selectUserByEmailAndPassword = async (email: string, password: string) => {
+      const user = await getConnection(node_env)
         .createQueryBuilder()
-        .select("COUNT(user.user_uid) AS cnt")
+        .select("user.user_uid, user.email")
         .from(User, "user")
         .where("user.email = :email", { email })
         .andWhere("user.password = :password", { password })
         .getRawOne();
 
-      return cnt;
+      return user;
     }
 
-    async updateNicknameByEmail(email: string, nickname: string) {
+    updateNicknameByEmail = async (email: string, nickname: string) => {
       return getConnection(node_env)
         .createQueryBuilder()
         .update(User)
@@ -54,5 +54,12 @@ export class UserRepository {
         .execute();
     }
 
-    
+    deleteUserByEmail = async (email: string) => {
+      return getConnection(node_env)
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where("email = :email", { email })
+        .execute();
+    }
 }
