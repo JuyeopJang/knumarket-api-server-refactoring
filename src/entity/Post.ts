@@ -29,7 +29,8 @@ export class Post {
     user: User;
 
     @OneToMany(() => Image, image => image.post, {
-        cascade: ["insert", "remove"]
+        cascade: ["insert", "remove", "update"],
+        eager: true
     })
     images: Image[]
 

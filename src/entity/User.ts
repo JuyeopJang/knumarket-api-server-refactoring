@@ -25,7 +25,8 @@ export class User {
     is_verified: boolean;
 
     @OneToMany(() => Post, post => post.user, {
-        cascade: ["insert", "remove"]
+        cascade: ["insert", "remove"],
+        eager: true
     })
     posts: Post[]
 

@@ -7,13 +7,18 @@ import { body, check, header, param, Result, ValidationError, validationResult }
 import { jwtVerify } from '../../lib/jwt';
 import { isAuthorized } from "../../middlewares/auth.middleware";
 import { PostRepository } from "./post.repo";
-import { PostService } from "./post.serv";
+import { PostService } from './post.serv';
+import { ImageService } from '../image/image.serv';
+import { ImageRepository } from "../image/image.repo";
+import { Post } from "../../entity/Post";
+
 
 export default class PostController implements ApiController {
 
     path: string = "/posts";
     router: Router = Router();
     postService = new PostService(new PostRepository());
+    imageService = new ImageService(new ImageRepository());
 
     constructor() {
         this.initializeRoutes();
@@ -23,21 +28,14 @@ export default class PostController implements ApiController {
         const routes = Router();
     
         routes
-          .post('/sign-up', [
-              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
-              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.') 
-            ], this.validationCheck, this.signUp)
-          .post('/login', [
-              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
-              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
-            ], this.validationCheck, this.login)
-          .get('/me', this.getMyInfo)
-          .put('/me', [
-              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
-            ], this.validationCheck, this.updateMyInfo)
-          .delete('/me', this.withdrawlMyInfo);
-
+          .post('/', [
+              check('title').isLength({ min: 2, max: 50}).withMessage('글 제목은 2자 이상 50자 이하의 문자열입니다.'),
+              check('description').isLength({ max: 500 }).withMessage('글 본문은 최대 500자 이하의 문자열입니다.'),
+              check('location').withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
+              check('max_head_count').withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
+              check('images').withMessage('이미지의 url을 담은 배열이어야 합니다.')
+            ], this.validationCheck, this.addPost)
+          .get('/:postUid', this.showPost);
         this.router.use(this.path, routes);
     }
 
@@ -60,116 +58,53 @@ export default class PostController implements ApiController {
         }
     }
 
-    signUp = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            await this.userService.signUp(req.body);
-
-            res.status(201).json({
-                success: true,
-                response: '회원가입에 성공했습니다.',
-                error: null
-            });
-        } catch (err) {
-            next(err);
-        }    
-    }
-
-    login = async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password } = req.body;
+    addPost = async (req: Request, res: Response, next: NextFunction) => {
+        const { images } = req.body;
 
         try {
-            const [accessToken, refreshToken] = await this.userService.getTokens(email, password);
-
-            res.status(200).json({
-                success: true,
-                response: {
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                },
-                error: null
-            });
+            const imagesFromImageService: Image[] = await this.imageService.addImages(images);
+            
+            await this.postService.addPost({
+                ...req.body,
+                images: imagesFromImageService
+            })
         } catch (err) {
             next(err);
         }
     }
 
-    getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const email = isAuthorized(req, res, next);
-
-            const userInfo = await this.userService.getMyInfo(email);
-
-            res.status(200).json({
-                success: true,
-                response: {
-                    email: userInfo.email,
-                    nickname: userInfo.nickname,
-                    is_verified: userInfo.is_verified
-                },
-                error: null
-            });
-        } catch (err) {
-            next(err);
-        }
+    showPosts = async (req: Request, res: Response, next: NextFunction) => {
+        // const posts: ;
     }
 
-    updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        const { nickname } = req.body;
+    showPost = async (req: Request, res: Response, next: NextFunction) => {
+        const { postUid } = req.params; //? path인가 파람인가 여튼
         
         try {
-            const userUid = isAuthorized(req, res, next);
+            const post: Post = await this.postService.getPost(postUid);
 
-            await this.userService.updateMyInfo(userUid, nickname);
-
-            res.status(200).json({
-                success: true,
-                response: {
-                    nickname
-                },
-                error: null
-            });
-
+            if (post) {
+                res.status(200).json({
+                    success: true,
+                    response: post,
+                    error: null
+                });
+            }
         } catch (err) {
             next(err);
         }
     }
 
-    withdrawlMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userUid = isAuthorized(req, res, next);
-
-            await this.userService.signOut(userUid);
-
-            res.status(200).json({
-                success: true,
-                response: '성공적으로 회원탈퇴 되었습니다.',
-                error: null
-            });
-
-        } catch (err) {
-            next(err);
-        }
+    showMyPosts = async (req: Request, res: Response, next: NextFunction) => {
+        
     }
 
-    reissueToken = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userUid = isAuthorized(req, res, next);
-            const accessToken = this.userService.createNewAccessToken();
-            const refreshToken = await this.userService.getRefreshTokenInRedis(userUid);
+    updatePost = async (req: Request, res: Response, next: NextFunction) => {
+        
+    }
 
-            res.status(200).json({
-                success: true,
-                response: {
-                    access_token: accessToken,
-                    refresh_token: refreshToken
-                },
-                error: null
-            });
-
-        } catch (err) {
-            next(err);
-        }
-
+    deletePost = async (req: Request, res: Response, next: NextFunction) => {
+        
     }
 
 }
