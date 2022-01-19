@@ -8,6 +8,6 @@ export class ImageService {
     }
 
     addImages = async (imageUrls: string[]) => {
-        await this.imageRepository.createImages(imageUrls);
+        return await this.imageRepository.createImages(imageUrls);
     }
 }

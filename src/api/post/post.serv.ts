@@ -27,4 +27,20 @@ export class PostService {
     return this.postRepository.getPostById(postUid);
   }
 
+  getPosts = async (startPage: number) => {
+    const skipValue = (startPage - 1) * 20;
+    
+    return this.postRepository.getPosts(skipValue); 
+  }
+
+  getMyPosts = async (startPage: number, userUid: string) => {
+    const skipValue = (startPage - 1) * 20;
+    
+    return this.postRepository.getMyPosts(skipValue, userUid); 
+  }
+
+  deletePost = async (postUid: string) => {
+    return this.postRepository.deletePostById(postUid);
+  }
+
 }

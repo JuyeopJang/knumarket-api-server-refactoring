@@ -35,7 +35,11 @@ export default class PostController implements ApiController {
               check('max_head_count').withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
               check('images').withMessage('이미지의 url을 담은 배열이어야 합니다.')
             ], this.validationCheck, this.addPost)
-          .get('/:postUid', this.showPost);
+          .get('/:postUid', this.showPost)
+          .get('/', this.showPosts)
+          .get('/me', this.showMyPosts)
+          .put('/:postUid', this.updatePost)
+          .delete('/:postUid', this.deletePost);
         this.router.use(this.path, routes);
     }
 
@@ -62,7 +66,7 @@ export default class PostController implements ApiController {
         const { images } = req.body;
 
         try {
-            const imagesFromImageService: Image[] = await this.imageService.addImages(images);
+            const imagesFromImageService = await this.imageService.addImages(images);
             
             await this.postService.addPost({
                 ...req.body,
@@ -74,7 +78,24 @@ export default class PostController implements ApiController {
     }
 
     showPosts = async (req: Request, res: Response, next: NextFunction) => {
-        // const posts: ;
+        // 가장 많은 요청이 있을 것으로 예상되는 부분 커뮤니티 글 읽기 부분
+        // 대부분의 사용자는 그냥 눈팅만 하는 경우가 많음
+        // 이런 기능을 캐시를 이용해 캐싱하면 성능이 매우 좋아지겠지
+        // 대용량 서비스임을 감안해서 1초에 한 번씩 캐싱 ㄱㄱ
+        const { page } = req.query;
+        let posts: Post[];
+        
+        try {
+            posts = await this.postService.getPosts(Number(page));
+        
+            res.status(200).json({
+                success: true,
+                response: posts,
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }
     }
 
     showPost = async (req: Request, res: Response, next: NextFunction) => {
@@ -96,15 +117,46 @@ export default class PostController implements ApiController {
     }
 
     showMyPosts = async (req: Request, res: Response, next: NextFunction) => {
+        const { page } = req.query;
+        let myPosts: Post[];
         
+        try {
+            const userUid = isAuthorized(req, res, next);
+
+            myPosts = await this.postService.getMyPosts(Number(page), userUid);
+        
+            res.status(200).json({
+                success: true,
+                response: myPosts,
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }
     }
 
     updatePost = async (req: Request, res: Response, next: NextFunction) => {
+        const { postUid } = req.params;
         
+
     }
 
     deletePost = async (req: Request, res: Response, next: NextFunction) => {
-        
+        const { postUid } = req.params;
+    
+        try {
+            const userUid = isAuthorized(req, res, next);
+
+            await this.postService.deletePost(postUid);
+
+            res.status(200).json({
+                success: true,
+                response: '글 삭제에 성공했습니다.',
+                error: null
+            })
+        } catch (err) {
+
+        }
     }
 
 }
