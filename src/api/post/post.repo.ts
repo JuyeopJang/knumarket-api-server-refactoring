@@ -1,10 +1,28 @@
-import { getRepository } from 'typeorm';
+import { FindManyOptions, getRepository, LessThan, MoreThan } from 'typeorm';
 import { node_env } from '../../config';
 import { Post } from '../../entity/Post';
 import { connection } from '../../lib/database';
-import { AddPostDto } from './dto/add.post.dto';
+import { AddPostDto } from './dto/AddPostDto';
+import { PostPaginationDto } from './dto/PostPaginationDto';
 
 export class PostRepository {
+
+    getPaginationOptions = (lastId: number) => {
+        const paginationOptions: FindManyOptions<Post> = {
+          select: ['id', 'title', 'images', 'created_at'],
+          order: {
+              id: 'DESC'
+          },
+          take: 20
+        };
+      
+        if (lastId) {
+          paginationOptions['id'] = LessThan(lastId);
+        }
+
+        return paginationOptions;
+    }
+
     createPost = async (addPostDto: AddPostDto) => {
         const post = new Post();
     
@@ -21,18 +39,8 @@ export class PostRepository {
         return connection.manager.findOne(Post, postUid);
     }
 
-    getPosts = async (skipValue: number) => {
-        const posts = await getRepository(Post)
-            .find({
-                take: 20,
-                skip: skipValue,
-                order: {
-                    created_at: 'DESC'
-                },
-                cache: 1000
-            })
-
-        return posts;
+    getPosts = async (lastId: number): Promise<PostPaginationDto[]> => {
+        return await getRepository(Post).find(this.getPaginationOptions(lastId));
     }
 
     getMyPosts = async (skipValue: number, userUid: string) => {

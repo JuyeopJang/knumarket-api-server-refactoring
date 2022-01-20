@@ -5,8 +5,8 @@ import { Image } from "./Image";
 @Entity()
 export class Post {
 
-    @PrimaryGeneratedColumn('uuid')
-    post_uid: string;
+    @PrimaryGeneratedColumn('increment')
+    id: number;
 
     @Column({ length: 50 })
     title: string;

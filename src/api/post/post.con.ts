@@ -11,6 +11,7 @@ import { PostService } from './post.serv';
 import { ImageService } from '../image/image.serv';
 import { ImageRepository } from "../image/image.repo";
 import { Post } from "../../entity/Post";
+import { PostPaginationDto } from "./dto/PostPaginationDto";
 
 
 export default class PostController implements ApiController {
@@ -82,15 +83,18 @@ export default class PostController implements ApiController {
         // 대부분의 사용자는 그냥 눈팅만 하는 경우가 많음
         // 이런 기능을 캐시를 이용해 캐싱하면 성능이 매우 좋아지겠지
         // 대용량 서비스임을 감안해서 1초에 한 번씩 캐싱 ㄱㄱ
-        const { page } = req.query;
-        let posts: Post[];
+        const { last_id } = req.query;
+        let posts: PostPaginationDto[];
         
         try {
-            posts = await this.postService.getPosts(Number(page));
+            posts = await this.postService.getPosts(Number(last_id));
         
             res.status(200).json({
                 success: true,
-                response: posts,
+                response: {
+                    posts,
+                    nextLastId: posts.length < 20 ? 0 : posts[posts.length - 1].id
+                },
                 error: null
             });
         } catch (err) {

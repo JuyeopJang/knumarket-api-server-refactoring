@@ -8,7 +8,9 @@ import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
 import { getRefreshToken, setRefreshToken } from '../../lib/redis';
 import { redisClient } from '../../lib/database';
-import { AddPostDto } from './dto/add.post.dto';
+import { AddPostDto } from './dto/AddPostDto';
+import { FindManyOptions } from 'typeorm';
+import { PostPaginationDto } from './dto/PostPaginationDto';
 
 
 export class PostService {
@@ -27,10 +29,8 @@ export class PostService {
     return this.postRepository.getPostById(postUid);
   }
 
-  getPosts = async (startPage: number) => {
-    const skipValue = (startPage - 1) * 20;
-    
-    return this.postRepository.getPosts(skipValue); 
+  getPosts = async (lastId: number): Promise<PostPaginationDto[]> => {
+    return await this.postRepository.getPosts(lastId);
   }
 
   getMyPosts = async (startPage: number, userUid: string) => {
