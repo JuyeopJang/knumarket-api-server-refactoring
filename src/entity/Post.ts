@@ -24,12 +24,13 @@ export class Post {
     is_archived: boolean;
 
     @ManyToOne(() => User, user => user.posts, {
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        cascade: ["insert", "remove"]
     })
     user: User;
 
     @OneToMany(() => Image, image => image.post, {
-        cascade: ["insert", "remove", "update"],
+        cascade: ["insert", "remove", "update"], // image entity에
         eager: true
     })
     images: Image[]

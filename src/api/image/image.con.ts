@@ -6,11 +6,8 @@ import { BadRequestException, HttpException, ServerException, UnauthorizedExcept
 import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
 import { jwtVerify } from '../../lib/jwt';
 import { isAuthorized } from "../../middlewares/auth.middleware";
-import { PostRepository } from "./post.repo";
-import { PostService } from './post.serv';
 import { ImageService } from '../image/image.serv';
 import { ImageRepository } from "../image/image.repo";
-
 
 export default class ImageController implements ApiController {
 
@@ -26,7 +23,8 @@ export default class ImageController implements ApiController {
         const routes = Router();
     
         routes
-          .post('/', this.addImages);
+          .post('/', this.addImageInS3) // multer-s3 거쳐야 함
+          .delete('/', this.deleteImage)
 
         this.router.use(this.path, routes);
     }
@@ -50,17 +48,55 @@ export default class ImageController implements ApiController {
         }
     }
 
-    addImages = async (req: Request, res: Response, next: NextFunction) => {
-        // multer를 통해 받아오는 image url 배열 바로 반환
-        const imageUrls = req.params;
+    addImageInS3 = async (req: Request, res: Response, next: NextFunction) => {
+        // s3에 이미지를 업로드해달라는 요청
+        const { imageUrl } = req.params; // multer-s3 거치고 난 뒤 imageUrl
 
-        return res.status(201).json({
-            success: true,
-            response: {
-                images: imageUrls
-            },
-            error: null
-        });
+        try {
+            await this.imageService.uploadImageInS3();
+            
+            res.status(201).json({
+                success: true,
+                response: {
+                    image: imageUrl
+                },
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }
     }
+
+    deleteImageInS3 = async (req: Request, res: Response, next: NextFunction) => {
+        // s3에 존재하는 이미지 삭제해달라는 요청
+        try {
+            await this.imageService.deletImagesInS3();
+
+            res.status(200).json({
+                success: true,
+                response: '이미지가 성공적으로 삭제 되었습니다.',
+                error: null
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // deleteImage = async (req: Request, res: Response, next: NextFunction) => {
+    //     const { imageUid } = req.params;
+
+    //     try {
+    //         await this.imageService.deletImageInS3();
+    //         await this.imageService.deleteImage(imageUid);
+    //     } catch (err) {
+    //         next(err);
+    //     }
+
+    //     res.status(201).json({
+    //         success: true,
+    //         response: '이미지가 성공적으로 삭제 되었습니다.',
+    //         error: null
+    //     });
+    // }
 
 }

@@ -1,11 +1,12 @@
-import { FindManyOptions, getRepository, LessThan, MoreThan } from 'typeorm';
+import { FindManyOptions, getRepository, LessThan, MoreThan, Repository } from 'typeorm';
 import { node_env } from '../../config';
 import { Post } from '../../entity/Post';
 import { connection } from '../../lib/database';
 import { AddPostDto } from './dto/AddPostDto';
 import { PostPaginationDto } from './dto/PostPaginationDto';
+import { UpdatePostDto } from './dto/UpdatePostDto';
 
-export class PostRepository {
+export class PostRepository extends Repository<Post> {
 
     getPaginationOptions = (lastId: number) => {
         const paginationOptions: FindManyOptions<Post> = {
@@ -59,8 +60,20 @@ export class PostRepository {
         return myPosts;
     }
 
+    updatePostById = async (updatePostDto: UpdatePostDto, postId: number) => {
+        const post = await this.findOne(postId);
+
+        post.title = updatePostDto.title;
+        post.description = updatePostDto.description;
+        post.location = updatePostDto.location;
+        post.max_head_count = updatePostDto.max_head_count;
+        post.images = updatePostDto.images;
+        post.is_archived = updatePostDto.isArchived;
+
+        await this.save(post);
+    }
+
     deletePostById = async (postUid: string) => {
-        await getRepository(Post)
-            .delete(postUid);
+        await getRepository(Post).delete(postUid);
     }
 }

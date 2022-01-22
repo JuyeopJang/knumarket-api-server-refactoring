@@ -11,6 +11,7 @@ import { redisClient } from '../../lib/database';
 import { AddPostDto } from './dto/AddPostDto';
 import { FindManyOptions } from 'typeorm';
 import { PostPaginationDto } from './dto/PostPaginationDto';
+import { UpdatePostDto } from './dto/UpdatePostDto';
 
 
 export class PostService {
@@ -37,6 +38,10 @@ export class PostService {
     const skipValue = (startPage - 1) * 20;
     
     return this.postRepository.getMyPosts(skipValue, userUid); 
+  }
+
+  updatePost = async (updatePostDto: UpdatePostDto, postUid: number) => {
+    return this.postRepository.updatePostById(updatePostDto, postUid);
   }
 
   deletePost = async (postUid: string) => {

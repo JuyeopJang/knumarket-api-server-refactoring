@@ -67,22 +67,25 @@ export default class PostController implements ApiController {
         const { images } = req.body;
 
         try {
-            const imagesFromImageService = await this.imageService.addImages(images);
+            const imagesFromImageService = await this.imageService.getImageObjs(images);
             
             await this.postService.addPost({
                 ...req.body,
                 images: imagesFromImageService
-            })
+            });
+
+            res.status(201).json({
+                success: true,
+                response: '글이 성공적으로 작성 되었습니다.',
+                error: null
+            });
         } catch (err) {
             next(err);
         }
+
     }
 
     showPosts = async (req: Request, res: Response, next: NextFunction) => {
-        // 가장 많은 요청이 있을 것으로 예상되는 부분 커뮤니티 글 읽기 부분
-        // 대부분의 사용자는 그냥 눈팅만 하는 경우가 많음
-        // 이런 기능을 캐시를 이용해 캐싱하면 성능이 매우 좋아지겠지
-        // 대용량 서비스임을 감안해서 1초에 한 번씩 캐싱 ㄱㄱ
         const { last_id } = req.query;
         let posts: PostPaginationDto[];
         
@@ -141,7 +144,26 @@ export default class PostController implements ApiController {
 
     updatePost = async (req: Request, res: Response, next: NextFunction) => {
         const { postUid } = req.params;
+        const { images } = req.body;
+
+        const imagesFromImageService = await this.imageService.getImageObjs(images);
         
+        try {
+
+            await this.postService.updatePost({
+                ...req.body,
+                images: imagesFromImageService
+            }, Number(postUid));
+
+            res.status(200).json({
+                success: true,
+                response: '글이 성공적으로 수정 되었습니다.',
+                error: null
+            });
+
+        } catch (err) {
+            next(err);
+        }
 
     }
 

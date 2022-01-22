@@ -1,21 +1,16 @@
+import { EntityRepository, Repository } from "typeorm";
 import { Image } from "../../entity/Image";
 import { connection } from "../../lib/database";
 
-export class ImageRepository {
+@EntityRepository()
+export class ImageRepository extends Repository<Image> {
     
     
-    createImages = async (imageUrls: string[]) => {
-        let images: Image[] = [];
-
-        imageUrls.forEach(imageUrl => {
-            const image = new Image();
-    
-            image.url = imageUrl;
-            images.push(image);
-        })
-
-        await connection.manager.save(images);
+    // createImageObjs = async (imageUrls: string[]) => {
         
-        return images;
+    // }
+
+    deleteImage = async (imageUid: string) => {
+        await connection.getRepository(Image).delete(imageUid);
     }
 }

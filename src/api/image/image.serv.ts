@@ -1,4 +1,5 @@
 import { ImageRepository } from "./image.repo";
+import { Image } from "../../entity/Image";
 
 export class ImageService {
     imageRepository: ImageRepository;
@@ -7,7 +8,28 @@ export class ImageService {
         this.imageRepository = imageRepository;
     }
 
-    addImages = async (imageUrls: string[]) => {
-        return await this.imageRepository.createImages(imageUrls);
+    uploadImageInS3 = async () => {
+        
+    }
+
+    deletImagesInS3 = async () => {
+        
+    }
+
+    getImageObjs = async (imageUrls: string[]) => {
+        const images: Image[] = [];
+
+        imageUrls.forEach(imageUrl => {
+            const image = new Image();
+    
+            image.url = imageUrl;
+            images.push(image);
+        });
+        
+        return images;
+    }
+
+    deleteImage = async (imageUid: string) => {
+        return await this.imageRepository.deleteImage(imageUid);
     }
 }

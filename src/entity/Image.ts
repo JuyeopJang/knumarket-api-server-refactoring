@@ -1,5 +1,4 @@
 import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToOne} from "typeorm";
-import { IsEmail } from 'class-validator';
 import { Post } from "./Post";
 
 @Entity()
