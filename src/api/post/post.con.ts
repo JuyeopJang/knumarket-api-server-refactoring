@@ -4,15 +4,17 @@ import { BadRequestException, HttpException, ServerException, UnauthorizedExcept
 // import UserService from "./user.serv";
 // import { UserRepository } from './user.repo';
 import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
-import { jwtVerify } from '../../lib/jwt';
 import { isAuthorized } from "../../middlewares/auth.middleware";
-import { PostRepository } from "./post.repo";
+import { Post } from "../../entity/Post";
 import { PostService } from './post.serv';
+import { PostRepository } from "./post.repo";
 import { ImageService } from '../image/image.serv';
 import { ImageRepository } from "../image/image.repo";
-import { Post } from "../../entity/Post";
-import { PostPaginationDto } from "./dto/PostPaginationDto";
-
+import { PostRoomService } from "../post_room/post-room.serv";
+import { PostRoomRepository } from "../post_room/post-room.repo";
+import { PostPaginationDto } from "../dto/PostPaginationDto";
+import { UserRepository } from "../user/user.repo";
+import { AddPostRoomDto } from "../dto/AddPostRoomDto";
 
 export default class PostController implements ApiController {
 
@@ -20,6 +22,7 @@ export default class PostController implements ApiController {
     router: Router = Router();
     postService = new PostService(new PostRepository());
     imageService = new ImageService(new ImageRepository());
+    postRoomService = new PostRoomService(new PostRoomRepository(), new UserRepository());
 
     constructor() {
         this.initializeRoutes();
@@ -67,11 +70,18 @@ export default class PostController implements ApiController {
         const { images } = req.body;
 
         try {
+            const userUid = isAuthorized(req, res, next);
+
             const imagesFromImageService = await this.imageService.getImageObjs(images);
+            const postRoomFromPostRoomService = await this.postRoomService.getPostRoom({
+                title: req.body.title,
+                max_head_count: req.body.max_head_count
+            }, userUid);
             
             await this.postService.addPost({
                 ...req.body,
-                images: imagesFromImageService
+                images: imagesFromImageService,
+                postRoom: postRoomFromPostRoomService
             });
 
             res.status(201).json({
@@ -168,12 +178,14 @@ export default class PostController implements ApiController {
     }
 
     deletePost = async (req: Request, res: Response, next: NextFunction) => {
-        const { postUid } = req.params;
+        const { postId } = req.params;
+        const pIdToNumber = Number(postId);
     
         try {
             const userUid = isAuthorized(req, res, next);
 
-            await this.postService.deletePost(postUid);
+            await this.imageService.deletImagesInS3(pIdToNumber);
+            await this.postService.deletePost(pIdToNumber);
 
             res.status(200).json({
                 success: true,

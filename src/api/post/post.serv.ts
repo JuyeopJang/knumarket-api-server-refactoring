@@ -8,10 +8,10 @@ import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
 import { getRefreshToken, setRefreshToken } from '../../lib/redis';
 import { redisClient } from '../../lib/database';
-import { AddPostDto } from './dto/AddPostDto';
+import { AddPostDto } from '../dto/AddPostDto';
 import { FindManyOptions } from 'typeorm';
-import { PostPaginationDto } from './dto/PostPaginationDto';
-import { UpdatePostDto } from './dto/UpdatePostDto';
+import { PostPaginationDto } from '../dto/PostPaginationDto';
+import { UpdatePostDto } from '../dto/UpdatePostDto';
 
 
 export class PostService {
@@ -44,7 +44,8 @@ export class PostService {
     return this.postRepository.updatePostById(updatePostDto, postUid);
   }
 
-  deletePost = async (postUid: string) => {
+  deletePost = async (postUid: number) => {
+    
     return this.postRepository.deletePostById(postUid);
   }
 

@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToMany} from "typeorm";
-import { IsEmail } from 'class-validator';
+import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToMany, OneToOne, JoinColumn} from "typeorm";
+import { Post } from "./Post";
+// import { IsEmail } from 'class-validator';
 import { User } from "./User";
 
 @Entity()
@@ -14,14 +15,15 @@ export class PostRoom {
     @Column()
     max_head_count: number;
 
-    @Column()
+    @Column({
+        default: 1
+    })
     current_head_count: number;
 
-    @Index()
-    @Column()
-    post_uid: string;
-
-    @ManyToMany(() => User, user => user.post_rooms)
+    @ManyToMany(() => User, user => user.post_rooms, {
+        eager: true,
+        cascade: ["insert", "remove", "update"]
+    })
     users: User[]
 
     @Column({ default: () => 'CURRENT_TIMESTAMP '})

@@ -24,7 +24,7 @@ export default class ImageController implements ApiController {
     
         routes
           .post('/', this.addImageInS3) // multer-s3 거쳐야 함
-          .delete('/', this.deleteImage)
+          .delete('/', this.deleteImageInS3)
 
         this.router.use(this.path, routes);
     }
@@ -52,25 +52,21 @@ export default class ImageController implements ApiController {
         // s3에 이미지를 업로드해달라는 요청
         const { imageUrl } = req.params; // multer-s3 거치고 난 뒤 imageUrl
 
-        try {
-            await this.imageService.uploadImageInS3();
-            
-            res.status(201).json({
-                success: true,
-                response: {
-                    image: imageUrl
-                },
-                error: null
-            });
-        } catch (err) {
-            next(err);
-        }
+        res.status(201).json({
+            success: true,
+            response: {
+                image: imageUrl
+            },
+            error: null
+        });
+        
     }
 
     deleteImageInS3 = async (req: Request, res: Response, next: NextFunction) => {
-        // s3에 존재하는 이미지 삭제해달라는 요청
+        const { image_url } = req.body;
+
         try {
-            await this.imageService.deletImagesInS3();
+            await this.imageService.deleteImageInS3(image_url);
 
             res.status(200).json({
                 success: true,
@@ -81,22 +77,4 @@ export default class ImageController implements ApiController {
             next(err);
         }
     }
-
-    // deleteImage = async (req: Request, res: Response, next: NextFunction) => {
-    //     const { imageUid } = req.params;
-
-    //     try {
-    //         await this.imageService.deletImageInS3();
-    //         await this.imageService.deleteImage(imageUid);
-    //     } catch (err) {
-    //         next(err);
-    //     }
-
-    //     res.status(201).json({
-    //         success: true,
-    //         response: '이미지가 성공적으로 삭제 되었습니다.',
-    //         error: null
-    //     });
-    // }
-
 }

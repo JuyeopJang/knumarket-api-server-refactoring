@@ -1,4 +1,4 @@
-import { Image } from "../../../entity/Image";
+import { Image } from "../../entity/Image";
 
 export class PostPaginationDto {
     id: number;

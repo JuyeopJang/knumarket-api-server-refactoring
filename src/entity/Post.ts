@@ -1,6 +1,7 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToOne, OneToMany} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToOne, OneToMany, OneToOne, JoinColumn} from "typeorm";
 import { User } from "./User";
 import { Image } from "./Image";
+import { PostRoom } from "./PostRoom";
 
 @Entity()
 export class Post {
@@ -22,6 +23,12 @@ export class Post {
 
     @Column()
     is_archived: boolean;
+
+    @OneToOne(() => PostRoom, {
+        cascade: ["insert"]
+    })
+    @JoinColumn()
+    post_room: PostRoom;
 
     @ManyToOne(() => User, user => user.posts, {
         onDelete: 'CASCADE',

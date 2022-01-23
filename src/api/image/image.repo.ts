@@ -4,13 +4,11 @@ import { connection } from "../../lib/database";
 
 @EntityRepository()
 export class ImageRepository extends Repository<Image> {
-    
-    
-    // createImageObjs = async (imageUrls: string[]) => {
-        
-    // }
-
-    deleteImage = async (imageUid: string) => {
-        await connection.getRepository(Image).delete(imageUid);
+    getImagesByPostId = async (postId: number) => {
+        return await this.find({
+            where: {
+                post: postId
+            }  
+        });
     }
 }

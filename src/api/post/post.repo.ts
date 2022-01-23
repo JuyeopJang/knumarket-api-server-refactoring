@@ -2,9 +2,9 @@ import { FindManyOptions, getRepository, LessThan, MoreThan, Repository } from '
 import { node_env } from '../../config';
 import { Post } from '../../entity/Post';
 import { connection } from '../../lib/database';
-import { AddPostDto } from './dto/AddPostDto';
-import { PostPaginationDto } from './dto/PostPaginationDto';
-import { UpdatePostDto } from './dto/UpdatePostDto';
+import { AddPostDto } from '../dto/AddPostDto';
+import { PostPaginationDto } from '../dto/PostPaginationDto';
+import { UpdatePostDto } from '../dto/UpdatePostDto';
 
 export class PostRepository extends Repository<Post> {
 
@@ -73,7 +73,7 @@ export class PostRepository extends Repository<Post> {
         await this.save(post);
     }
 
-    deletePostById = async (postUid: string) => {
-        await getRepository(Post).delete(postUid);
+    deletePostById = async (postUid: number) => {
+        await this.delete(postUid);
     }
 }
