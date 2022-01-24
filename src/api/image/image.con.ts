@@ -1,13 +1,8 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
-import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
-// import UserService from "./user.serv";
-// import { UserRepository } from './user.repo';
-import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
-import { jwtVerify } from '../../lib/jwt';
-import { isAuthorized } from "../../middlewares/auth.middleware";
 import { ImageService } from '../image/image.serv';
 import { ImageRepository } from "../image/image.repo";
+import { isAuthorized } from "../../middlewares/auth.middleware";
 
 export default class ImageController implements ApiController {
 
@@ -23,29 +18,10 @@ export default class ImageController implements ApiController {
         const routes = Router();
     
         routes
-          .post('/', this.addImageInS3) // multer-s3 거쳐야 함
-          .delete('/', this.deleteImageInS3)
+          .post('/', isAuthorized, this.addImageInS3) // multer-s3 거쳐야 함
+          .delete('/', isAuthorized, this.deleteImageInS3)
 
         this.router.use(this.path, routes);
-    }
-
-    validationCheck = async (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            const errorFormatter = ({ param, msg }: ValidationError) => {
-                return {
-                    param,
-                    msg
-                }    
-            };
-            
-            const result = errors.formatWith(errorFormatter);
-
-            next(new BadRequestException(result.array()));
-        } else {
-            next();
-        }
     }
 
     addImageInS3 = async (req: Request, res: Response, next: NextFunction) => {

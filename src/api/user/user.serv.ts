@@ -73,6 +73,16 @@ export default class UserService {
     return tokens;
   }
 
+  getUser = async (userUid: string) => {
+    const user = await this.userRepository.findOne(userUid);
+
+    if (!user) {
+      // 존재하지 않는 유저다 404?
+    }
+
+    return user;
+  }
+
   setRefreshToken = (userUid: string, refreshToken: string) => {
     setRefreshToken(userUid, refreshToken);
   }

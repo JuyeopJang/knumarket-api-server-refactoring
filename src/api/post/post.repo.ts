@@ -8,17 +8,25 @@ import { UpdatePostDto } from '../dto/UpdatePostDto';
 
 export class PostRepository extends Repository<Post> {
 
-    getPaginationOptions = (lastId: number) => {
+    getPaginationOptions = (lastId: number, userUid: string) => {
         const paginationOptions: FindManyOptions<Post> = {
           select: ['id', 'title', 'images', 'created_at'],
           order: {
-              id: 'DESC'
+            id: 'DESC'
           },
           take: 20
         };
       
         if (lastId) {
-          paginationOptions['id'] = LessThan(lastId);
+            paginationOptions['id'] = LessThan(lastId);
+        }
+
+        if (userUid) {
+            paginationOptions['where'] = {
+                user: {
+                    user_uid: userUid
+                }
+            };
         }
 
         return paginationOptions;
@@ -32,6 +40,7 @@ export class PostRepository extends Repository<Post> {
         post.location = addPostDto.location;
         post.max_head_count = addPostDto.max_head_count;
         post.images = addPostDto.images;
+        post.user = addPostDto.user;
 
         await getRepository(Post).save(post);
     }
@@ -41,23 +50,11 @@ export class PostRepository extends Repository<Post> {
     }
 
     getPosts = async (lastId: number): Promise<PostPaginationDto[]> => {
-        return await getRepository(Post).find(this.getPaginationOptions(lastId));
+        return await getRepository(Post).find(this.getPaginationOptions(lastId, ''));
     }
 
-    getMyPosts = async (skipValue: number, userUid: string) => {
-        const myPosts = await getRepository(Post)
-            .find({
-                take: 20,
-                skip: skipValue,
-                order: {
-                    created_at: 'DESC'
-                },
-                where: {
-                    user: userUid
-                }
-            })
-
-        return myPosts;
+    getMyPosts = async (lastId: number, userUid: string) => {
+        return await getRepository(Post).find(this.getPaginationOptions(lastId, userUid));
     }
 
     updatePostById = async (updatePostDto: UpdatePostDto, postId: number) => {

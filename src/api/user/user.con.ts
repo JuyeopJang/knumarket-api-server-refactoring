@@ -1,11 +1,10 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
-import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
 import UserService from "./user.serv";
 import { UserRepository } from './user.repo';
-import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
-import { jwtVerify } from '../../lib/jwt';
+import { body } from "express-validator";
 import { isAuthorized } from "../../middlewares/auth.middleware";
+import { validationCheck } from "../../middlewares/validation.middleware";
 
 export default class UserController implements ApiController {
 
@@ -22,42 +21,23 @@ export default class UserController implements ApiController {
     
         routes
           .post('/sign-up', [
-              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
-              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
-              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.') 
-            ], this.validationCheck, this.signUp)
+              body('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
+              body('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.'),
+              body('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.') 
+            ], validationCheck, this.signUp)
           .post('/login', [
-              check('email', 'req body에 email이 존재하지 않습니다.').isEmail().withMessage('이메일 형식이 아닙니다.'),
-              check('password', 'req body에 password가 존재하지 않습니다.').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
-            ], this.validationCheck, this.login)
-          .get('/me', this.getMyInfo)
+              body('email').isEmail().withMessage('이메일 형식이 아닙니다.'),
+              body('password').isLength({ min: 6, max: 20}).withMessage('비밀번호는 6자 이상 20자 이하의 문자열입니다.')
+            ], validationCheck, this.login)
+          .get('/me', isAuthorized, this.getMyInfo)
           .put('/me', [
-              check('nickname', 'req body에 nickname이 존재하지 않습니다.').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
-            ], this.validationCheck, this.updateMyInfo)
-          .delete('/me', this.withdrawlMyInfo)
-          .get('/token', this.reissueToken);
-
-        this.router.use(this.path, routes);
-    }
-
-    validationCheck = async (req: Request, res: Response, next: NextFunction) => {
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-            const errorFormatter = ({ param, msg }: ValidationError) => {
-                return {
-                    param,
-                    msg
-                }    
-            };
-            
-            const result = errors.formatWith(errorFormatter);
-
-            next(new BadRequestException(result.array()));
-        } else {
-            next();
+              body('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
+            ], validationCheck, isAuthorized, this.updateMyInfo)
+          .delete('/me', isAuthorized, this.withdrawlMyInfo)
+          .get('/token', isAuthorized, this.reissueToken);
+          
+          this.router.use(this.path, routes);
         }
-    }
 
     signUp = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -93,10 +73,11 @@ export default class UserController implements ApiController {
     }
 
     getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+        const { userUid } = res.locals;
+ 
         try {
-            const email = isAuthorized(req, res, next);
 
-            const userInfo = await this.userService.getMyInfo(email);
+            const userInfo = await this.userService.getMyInfo(userUid);
 
             res.status(200).json({
                 success: true,
@@ -114,9 +95,9 @@ export default class UserController implements ApiController {
 
     updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
         const { nickname } = req.body;
+        const { userUid } = res.locals;
         
         try {
-            const userUid = isAuthorized(req, res, next);
 
             await this.userService.updateMyInfo(userUid, nickname);
 
@@ -134,8 +115,9 @@ export default class UserController implements ApiController {
     }
 
     withdrawlMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+        const { userUid } = res.locals;
+        
         try {
-            const userUid = isAuthorized(req, res, next);
 
             await this.userService.signOut(userUid);
 
@@ -151,8 +133,9 @@ export default class UserController implements ApiController {
     }
 
     reissueToken = async (req: Request, res: Response, next: NextFunction) => {
+        const { userUid } = res.locals;
+        
         try {
-            const userUid = isAuthorized(req, res, next);
             const accessToken = this.userService.createNewAccessToken();
             const refreshToken = await this.userService.getRefreshTokenInRedis(userUid);
 

@@ -1,14 +1,12 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
 import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
-// import UserService from "./user.serv";
-// import { UserRepository } from './user.repo';
-import { body, check, header, param, Result, ValidationError, validationResult } from "express-validator";
-import { jwtVerify } from '../../lib/jwt';
+import { param } from "express-validator";
 import { isAuthorized } from "../../middlewares/auth.middleware";
 import { PostRoomService } from "./post-room.serv";
 import { PostRoomRepository } from "./post-room.repo";
 import { UserRepository } from "../user/user.repo";
+import { validationCheck } from "../../middlewares/validation.middleware";
 
 
 export default class PostRoomController implements ApiController {
@@ -25,31 +23,12 @@ export default class PostRoomController implements ApiController {
         const routes = Router();
     
         routes
-          .get('/', this.showMyChatRooms)
-          .put('/:roomUid', this.participateInRoom)
-          .put('/:roomUid', this.exitOutOfRoom);
+          .get('/', isAuthorized, this.showMyChatRooms)
+          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, this.participateInRoom)
+          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, this.exitOutOfRoom);
 
         this.router.use(this.path, routes);
     }
-
-    // validationCheck = async (req: Request, res: Response, next: NextFunction) => {
-    //     const errors = validationResult(req);
-
-    //     if (!errors.isEmpty()) {
-    //         const errorFormatter = ({ param, msg }: ValidationError) => {
-    //             return {
-    //                 param,
-    //                 msg
-    //             }    
-    //         };
-            
-    //         const result = errors.formatWith(errorFormatter);
-
-    //         next(new BadRequestException(result.array()));
-    //     } else {
-    //         next();
-    //     }
-    // }
 
     showMyChatRooms = async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -67,10 +46,9 @@ export default class PostRoomController implements ApiController {
 
     participateInRoom = async (req: Request, res: Response, next: NextFunction) => {
         const { roomUid } = req.params;
+        const { userUid } = res.locals;
 
         try {
-            const userUid = isAuthorized(req, res, next);
-
             await this.postRoomService.participateUserInRoom(userUid, roomUid);
             
             res.status(200).json({
@@ -83,14 +61,13 @@ export default class PostRoomController implements ApiController {
 
     exitOutOfRoom = async (req: Request, res: Response, next: NextFunction) => {
         const { roomUid } = req.params;
+        const { userUid } = res.locals;
 
         try {
-            const userUid = isAuthorized(req, res, next);
-
             await this.postRoomService.deleteUserInRoom(userUid, roomUid);            
             
             res.status(200).json({
-
+                
             });
         } catch (err) {
             next(err);

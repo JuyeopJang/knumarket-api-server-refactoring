@@ -34,10 +34,8 @@ export class PostService {
     return await this.postRepository.getPosts(lastId);
   }
 
-  getMyPosts = async (startPage: number, userUid: string) => {
-    const skipValue = (startPage - 1) * 20;
-    
-    return this.postRepository.getMyPosts(skipValue, userUid); 
+  getMyPosts = async (lastId: number, userUid: string) => {
+    return await this.postRepository.getMyPosts(lastId, userUid); 
   }
 
   updatePost = async (updatePostDto: UpdatePostDto, postUid: number) => {
