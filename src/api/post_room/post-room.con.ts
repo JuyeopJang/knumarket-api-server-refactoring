@@ -1,12 +1,12 @@
 import ApiController from "../interfaces/ApiController";
 import { Request, Response, NextFunction, Router } from 'express';
-import { BadRequestException, HttpException, ServerException, UnauthorizedException } from '../../common/exceptions';
 import { param } from "express-validator";
 import { isAuthorized } from "../../middlewares/auth.middleware";
 import { PostRoomService } from "./post-room.serv";
 import { PostRoomRepository } from "./post-room.repo";
 import { UserRepository } from "../user/user.repo";
 import { validationCheck } from "../../middlewares/validation.middleware";
+import { wrap } from "../../lib/req-handler";
 
 
 export default class PostRoomController implements ApiController {
@@ -23,54 +23,44 @@ export default class PostRoomController implements ApiController {
         const routes = Router();
     
         routes
-          .get('/', isAuthorized, this.showMyChatRooms)
-          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, this.participateInRoom)
-          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, this.exitOutOfRoom);
+          .get('/me', isAuthorized, wrap(this.showMyChatRooms))
+          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, wrap(this.participateInRoom))
+          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, wrap(this.exitOutOfRoom));
 
         this.router.use(this.path, routes);
     }
 
     showMyChatRooms = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const userUid = isAuthorized(req, res, next);
-
-            const myRooms = await this.postRoomService.getMyRooms(userUid);
-            
-            res.status(200).json({
-
-            });
-        } catch (err) {
-            next(err);
-        }
+        const { userUid } = res.locals;
+        const myRooms = await this.postRoomService.getMyRooms(userUid);
+        
+        return {
+            statusCode: 200,
+            response: myRooms
+        };
     }
 
     participateInRoom = async (req: Request, res: Response, next: NextFunction) => {
         const { roomUid } = req.params;
         const { userUid } = res.locals;
 
-        try {
-            await this.postRoomService.participateUserInRoom(userUid, roomUid);
-            
-            res.status(200).json({
+        await this.postRoomService.participateUserInRoom(userUid, roomUid);
 
-            });
-        } catch (err) {
-            next(err);
-        }
+        return {
+            statusCode: 200,
+            response: '성공적으로 채팅 방에 참여 됐습니다.'
+        };
     }
 
     exitOutOfRoom = async (req: Request, res: Response, next: NextFunction) => {
         const { roomUid } = req.params;
         const { userUid } = res.locals;
 
-        try {
-            await this.postRoomService.deleteUserInRoom(userUid, roomUid);            
-            
-            res.status(200).json({
-                
-            });
-        } catch (err) {
-            next(err);
-        }
+        await this.postRoomService.deleteUserInRoom(userUid, roomUid);
+        
+        return {
+            statusCode: 200,
+            response: '성공적으로 채팅 방에서 나가게 됐습니다.'
+        };
     }
 }

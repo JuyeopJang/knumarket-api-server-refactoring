@@ -1,6 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColumn, ManyToMany, OneToOne, JoinColumn} from "typeorm";
-import { Post } from "./Post";
-// import { IsEmail } from 'class-validator';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
 import { User } from "./User";
 
 @Entity()
@@ -24,6 +22,7 @@ export class PostRoom {
         eager: true,
         cascade: ["insert", "remove", "update"]
     })
+    @JoinTable()
     users: User[]
 
     @Column({ default: () => 'CURRENT_TIMESTAMP '})

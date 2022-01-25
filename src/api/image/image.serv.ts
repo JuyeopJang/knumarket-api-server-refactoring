@@ -1,6 +1,6 @@
 import { ImageRepository } from "./image.repo";
 import { Image } from "../../entity/Image";
-import { image } from "faker";
+import { deleteImage } from "../../lib/multer-s3";
 
 export class ImageService {
     imageRepository: ImageRepository;
@@ -9,31 +9,16 @@ export class ImageService {
         this.imageRepository = imageRepository;
     }
 
-    uploadImageInS3 = async () => {
-        
-    }
-
     deleteImageInS3 = async (imageUrl: string) => {
-        // s3.deleteObject({
-        //     Bucket: s3Bucket,
-        //     Key: imageUrl
-        // }, (err, data) => {
-        //     if (err) throw new Error(err.message);
-        //     else console.log(data);
-        // });
+        deleteImage(imageUrl);
     }
 
     deletImagesInS3 = async (postId: number) => {
-        // const images = await this.imageRepository.getImagesByPostId(postId);     
-        // images.forEach(image => {
-        //     s3.deleteObject({
-        //         Bucket: s3Bucket,
-        //         Key: image.url
-        //     }, (err, data) => {
-        //         if (err) throw new Error(err.message);
-        //         else console.log(data);
-        //     });
-        // });
+        const images = await this.imageRepository.getImagesByPostId(postId);     
+        
+        images.forEach(image => {
+            deleteImage(image.url);
+        });
     }
 
     getImageObjs = async (imageUrls: string[]) => {

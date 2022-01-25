@@ -3,6 +3,8 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { ImageService } from '../image/image.serv';
 import { ImageRepository } from "../image/image.repo";
 import { isAuthorized } from "../../middlewares/auth.middleware";
+import { wrap } from "../../lib/req-handler";
+import { uploadImage } from "../../middlewares/image.middleware";
 
 export default class ImageController implements ApiController {
 
@@ -18,39 +20,31 @@ export default class ImageController implements ApiController {
         const routes = Router();
     
         routes
-          .post('/', isAuthorized, this.addImageInS3) // multer-s3 거쳐야 함
-          .delete('/', isAuthorized, this.deleteImageInS3)
+          .post('/', isAuthorized, uploadImage, wrap(this.addImageInS3)) // multer-s3 거쳐야 함
+          .delete('/', isAuthorized, wrap(this.deleteImageInS3))
 
         this.router.use(this.path, routes);
     }
 
     addImageInS3 = async (req: Request, res: Response, next: NextFunction) => {
-        // s3에 이미지를 업로드해달라는 요청
-        const { imageUrl } = req.params; // multer-s3 거치고 난 뒤 imageUrl
+        const { imageUrl } = req.params;
 
-        res.status(201).json({
-            success: true,
+        return {
+            statusCode: 201,
             response: {
                 image: imageUrl
-            },
-            error: null
-        });
-        
+            }
+        };
     }
 
     deleteImageInS3 = async (req: Request, res: Response, next: NextFunction) => {
         const { image_url } = req.body;
 
-        try {
-            await this.imageService.deleteImageInS3(image_url);
+        await this.imageService.deleteImageInS3(image_url);
 
-            res.status(200).json({
-                success: true,
-                response: '이미지가 성공적으로 삭제 되었습니다.',
-                error: null
-            });
-        } catch (err) {
-            next(err);
-        }
+        return {
+            statusCode: 200,
+            response: '이미지가 성공적으로 삭제 되었습니다.'
+        };
     }
 }

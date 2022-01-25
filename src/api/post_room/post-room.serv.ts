@@ -1,4 +1,5 @@
 import { getManager, Transaction, TransactionManager } from "typeorm";
+import { NotFoundException } from "../../common/exceptions/not-found.exception";
 import { node_env } from "../../config";
 import { AddPostRoomDto } from "../dto/AddPostRoomDto";
 import { UserRepository } from "../user/user.repo";
@@ -14,13 +15,11 @@ export class PostRoomService {
         this.userRepository = userRepository;
     }
 
-    // @Transaction({ isolation: "READ COMMITTED" })
     getPostRoom = async (addPostRoomDto: AddPostRoomDto, userUid: string) => {
         const user = await this.userRepository.findOne(userUid);
 
         if (!user) {
-        // 존재하지 않는 유저라고 에러 던짐
-        // 로직이 진행되는 도중에 회원탈퇴 할 수도 있잖아?
+            throw new NotFoundException('존재하지 않는 회원입니다.');
         }
     
         const postRoom = this.postRoomRepository.create({
@@ -29,7 +28,7 @@ export class PostRoomService {
         });
 
         if (!postRoom) {
-            // postRoom 없으면 에러
+            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
         await this.postRoomRepository.save(postRoom);
@@ -41,13 +40,13 @@ export class PostRoomService {
         const user = await this.userRepository.findOne(userUid);
 
         if (!user) {
-            // 존재하지 않는 유저라고 에러 던짐
+            throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
         const postRoom = await this.postRoomRepository.findOne(roomUid);
     
         if (!postRoom) {
-            // postRoom 없으면 에러
+            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
         postRoom.users.push(user);
@@ -59,13 +58,13 @@ export class PostRoomService {
         const user = await this.userRepository.findOne(userUid);
 
         if (!user) {
-            // 존재하지 않는 유저라고 에러 던짐
+            throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
         const postRoom = await this.postRoomRepository.findOne(roomUid);
     
         if (!postRoom) {
-            // postRoom 없으면 에러
+            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
         const indexOfUser = postRoom.users.indexOf(user);
@@ -73,5 +72,23 @@ export class PostRoomService {
         postRoom.users = [...postRoom.users.slice(0, indexOfUser), ...postRoom.users.slice(indexOfUser + 1)];
 
         await this.postRoomRepository.save(postRoom);
+    }
+
+    getMyRooms = async (userUid: string) => {
+        const user = await this.userRepository.findOne(userUid);
+
+        if (!user) {
+            throw new NotFoundException('존재하지 않는 회원입니다.');
+        }
+
+        const myPosts = await this.userRepository.find({
+            select: ['user_uid'],
+            where: {
+                user_uid: userUid
+            },
+            relations: ['post_room']
+        })
+
+        return myPosts;
     }
 }

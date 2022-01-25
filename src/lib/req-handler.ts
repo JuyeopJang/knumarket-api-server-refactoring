@@ -1,11 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 
 export const wrap = (handler) => {
-    async (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const response = await handler(req, res, next);
-            res.json(response);
-            next();
+            const { statusCode, response } = await handler(req, res, next);
+            
+            res.status(statusCode).json({
+                suceess: true,
+                response,
+                error: null
+            });
         } catch (err) {
             next(err);
         }

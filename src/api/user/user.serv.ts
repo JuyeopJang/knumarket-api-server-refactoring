@@ -9,6 +9,7 @@ import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
 import { getRefreshToken, setRefreshToken } from '../../lib/redis';
 import { redisClient } from '../../lib/database';
+import { NotFoundException } from '../../common/exceptions/not-found.exception';
 
 
 export default class UserService {
@@ -87,16 +88,29 @@ export default class UserService {
     setRefreshToken(userUid, refreshToken);
   }
 
-  getMyInfo = async (email: string) => {
-    return this.userRepository.findByEmail(email);
+  getMyInfo = async (userUid: string) => {
+    const user = await this.userRepository.findOne(userUid);
+  
+    if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
+    return user;
   }
 
-  updateMyInfo = async (email: string, nickname: string) => {
-    return this.userRepository.updateNicknameByEmail(email, nickname)
+  updateMyInfo = async (userUid: string, nickname: string) => {
+    const user = await this.userRepository.findOne(userUid);
+  
+    if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
+    
+    user.nickname = nickname;
+    
+    await this.userRepository.save(user);
   }
 
-  signOut = async (email: string) => {
-    return this.userRepository.deleteUserByEmail(email);
+  signOut = async (userUid: string) => {
+    const user = await this.userRepository.findOne(userUid);
+  
+    if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
+
+    await this.userRepository.delete(userUid);
   }
 
   createNewAccessToken = async () => {

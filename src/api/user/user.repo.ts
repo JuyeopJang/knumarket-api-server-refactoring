@@ -43,22 +43,4 @@ export class UserRepository extends Repository<User> {
 
       return user;
     }
-
-    updateNicknameByEmail = async (email: string, nickname: string) => {
-      return getConnection(node_env)
-        .createQueryBuilder()
-        .update(User)
-        .set({ nickname })
-        .where("email = :email", { email })
-        .execute();
-    }
-
-    deleteUserByEmail = async (email: string) => {
-      return getConnection(node_env)
-        .createQueryBuilder()
-        .delete()
-        .from(User)
-        .where("email = :email", { email })
-        .execute();
-    }
 }
