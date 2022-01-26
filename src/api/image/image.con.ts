@@ -10,9 +10,10 @@ export default class ImageController implements ApiController {
 
     path: string = "/images";
     router: Router = Router();
-    imageService = new ImageService(new ImageRepository());
+    private imageService: ImageService;
 
-    constructor() {
+    constructor(imageService: ImageService) {
+        this.imageService = imageService;
         this.initializeRoutes();
     }
 

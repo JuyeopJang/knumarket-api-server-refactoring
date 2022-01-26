@@ -2,7 +2,6 @@ import {Entity, PrimaryGeneratedColumn, Column, Index, Timestamp, DeleteDateColu
 import { IsEmail } from 'class-validator';
 import { Post } from "./Post";
 import { PostRoom } from "./PostRoom";
-import { unique } from "faker";
 
 @Entity()
 export class User {
@@ -10,7 +9,7 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     user_uid: string;
 
-    @Index(unique)
+    @Index()
     @Column({ length: 50 })
     @IsEmail()
     email: string;

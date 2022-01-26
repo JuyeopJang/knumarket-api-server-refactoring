@@ -19,7 +19,6 @@ export class PostRoom {
     current_head_count: number;
 
     @ManyToMany(() => User, user => user.post_rooms, {
-        eager: true,
         cascade: ["insert", "remove", "update"]
     })
     @JoinTable()

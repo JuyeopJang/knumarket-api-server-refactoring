@@ -1,21 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException, UnauthorizedException } from '../../common/exceptions/';
+import { UnauthorizedException } from '../../common/exceptions/';
 import crypto from 'crypto';
-// import * as jwt from '../../lib/jwt.js';
 import { UserRepository } from './user.repo';
 import { PostRepository } from '../post/post.repo';
 import { UserDao } from '../interfaces/dao/UserDao.js';
 import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
 import { getRefreshToken, setRefreshToken } from '../../lib/redis';
-import { redisClient } from '../../lib/database';
 import { NotFoundException } from '../../common/exceptions/not-found.exception';
-
 
 export default class UserService {
 
   userRepository: UserRepository;
-  postRepository: PostRepository;
     
   constructor(userRepository: UserRepository) {
     this.userRepository = userRepository;
@@ -77,9 +73,7 @@ export default class UserService {
   getUser = async (userUid: string) => {
     const user = await this.userRepository.findOne(userUid);
 
-    if (!user) {
-      // 존재하지 않는 유저다 404?
-    }
+    if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
 
     return user;
   }

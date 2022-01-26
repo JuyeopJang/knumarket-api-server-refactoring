@@ -11,9 +11,10 @@ export default class UserController implements ApiController {
 
     path: string = "/users";
     router: Router = Router();
-    userService = new UserService(new UserRepository());
+    private userService: UserService;
 
-    constructor() {
+    constructor(userService: UserService) {
+        this.userService = userService;
         this.initializeRoutes();
     }
 
@@ -34,8 +35,8 @@ export default class UserController implements ApiController {
           .put('/me', [
               body('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
             ], validationCheck, isAuthorized, wrap(this.updateMyInfo))
-          .delete('/me', isAuthorized, wrap(this.withdrawlMyInfo))
-          .get('/token', isAuthorized, wrap(this.reissueToken));
+          .delete('/me', isAuthorized, wrap(this.withdrawlMyInfo));
+        //   .get('/token', isAuthorized, wrap(this.reissueToken));
           
           this.router.use(this.path, routes);
         }

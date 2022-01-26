@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from 'express';
 import bodyParser from 'body-parser';
-import csurf from 'csurf';
+// import csurf from 'csurf';
 import helmet from 'helmet';
 import ApiController from './api/interfaces/ApiController';
 import morgan from 'morgan';

@@ -19,12 +19,21 @@ export default class PostController implements ApiController {
 
     path: string = "/posts";
     router: Router = Router();
-    postService = new PostService(new PostRepository());
-    imageService = new ImageService(new ImageRepository());
-    postRoomService = new PostRoomService(new PostRoomRepository(), new UserRepository());
-    userService = new UserService(new UserRepository());
+    private postService: PostService
+    private imageService: ImageService
+    private postRoomService: PostRoomService
+    private userService: UserService
 
-    constructor() {
+    constructor(
+        postService: PostService, 
+        imageService: ImageService,
+        postRoomService: PostRoomService,
+        userService: UserService 
+    ) {
+        this.postService = postService;
+        this.imageService = imageService;
+        this.postRoomService = postRoomService;
+        this.userService = userService;
         this.initializeRoutes();
     }
 

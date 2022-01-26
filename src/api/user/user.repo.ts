@@ -24,7 +24,7 @@ export class UserRepository extends Repository<User> {
     }
 
     createUser = async (user: UserDao) => {
-      return getConnection(node_env)
+      return await getConnection(node_env)
         .createQueryBuilder()
         .insert()
         .into(User)
