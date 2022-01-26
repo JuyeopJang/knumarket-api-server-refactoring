@@ -12,15 +12,21 @@ import { PostRoomRepository } from './api/post_room/post-room.repo';
 import PostRoomController from './api/post_room/post-room.con';
 import ImageController from './api/image/image.con';
 import App from './app';
+import { getCustomRepository } from 'typeorm';
+import { node_env } from './config';
 
 export async function startServer() {
   await initializeDatabase();
 
-  const userRepository = new UserRepository();
+  const userRepository = getCustomRepository(UserRepository, node_env);
+  const postRepository = getCustomRepository(PostRepository, node_env);
+  const imageRepository = getCustomRepository(ImageRepository, node_env);
+  const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
+
   const userService = new UserService(userRepository);
-  const postService = new PostService(new PostRepository());
-  const imageService = new ImageService(new ImageRepository());
-  const postRoomService = new PostRoomService(new PostRoomRepository(), userRepository);
+  const postService = new PostService(postRepository);
+  const imageService = new ImageService(imageRepository);
+  const postRoomService = new PostRoomService(postRoomRepository, userRepository);
 
   const app = new App([
     new UserController(userService),

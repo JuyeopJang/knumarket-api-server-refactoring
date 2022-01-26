@@ -1,8 +1,9 @@
 import { User } from '../../entity/User';
-import { FindConditions, FindOneOptions, getConnection, ObjectID, Repository } from 'typeorm';
+import { EntityRepository, FindConditions, FindOneOptions, getConnection, ObjectID, Repository } from 'typeorm';
 import { UserDao } from '../interfaces/dao/UserDao';
 import { node_env } from '../../config';
 
+@EntityRepository(User)
 export class UserRepository extends Repository<User> {
     
   countByEmail = async (email: string) => {
@@ -33,14 +34,9 @@ export class UserRepository extends Repository<User> {
     }
 
     selectUserByEmailAndPassword = async (email: string, password: string) => {
-      const user = await getConnection(node_env)
-        .createQueryBuilder()
-        .select("user.user_uid, user.email")
-        .from(User, "user")
-        .where("user.email = :email", { email })
-        .andWhere("user.password = :password", { password })
-        .getRawOne();
-
-      return user;
+      return this.findOne({
+        email,
+        password
+      });
     }
 }

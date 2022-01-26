@@ -24,8 +24,8 @@ export default class PostRoomController implements ApiController {
     
         routes
           .get('/me', isAuthorized, wrap(this.showMyChatRooms))
-          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, wrap(this.participateInRoom))
-          .put('/:roomUid', param('roomUid'), validationCheck, isAuthorized, wrap(this.exitOutOfRoom));
+          .put('/:roomUid', param('roomUid').exists({ checkFalsy: true, checkNull: true }), validationCheck, isAuthorized, wrap(this.participateInRoom))
+          .put('/:roomUid', param('roomUid').exists({ checkFalsy: true, checkNull: true }), validationCheck, isAuthorized, wrap(this.exitOutOfRoom));
 
         this.router.use(this.path, routes);
     }

@@ -1,4 +1,4 @@
-import { FindManyOptions, getRepository, LessThan, MoreThan, Repository } from 'typeorm';
+import { EntityRepository, FindManyOptions, getRepository, LessThan, MoreThan, Repository } from 'typeorm';
 import { node_env } from '../../config';
 import { Post } from '../../entity/Post';
 import { connection } from '../../lib/database';
@@ -6,6 +6,7 @@ import { AddPostDto } from '../dto/AddPostDto';
 import { PostPaginationDto } from '../dto/PostPaginationDto';
 import { UpdatePostDto } from '../dto/UpdatePostDto';
 
+@EntityRepository(Post)
 export class PostRepository extends Repository<Post> {
 
     getPaginationOptions = (lastId: number, userUid: string) => {

@@ -44,23 +44,23 @@ export default class PostController implements ApiController {
           .post('/', [
               body('title').isLength({ min: 2, max: 50 }).withMessage('글 제목은 2자 이상 50자 이하의 문자열입니다.'),
               body('description').isLength({ max: 500 }).withMessage('글 본문은 최대 500자 이하의 문자열입니다.'),
-              body('location').withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
-              body('max_head_count').withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
-              body('images').withMessage('이미지의 url을 담은 배열이어야 합니다.')
+              body('location').isInt({ min: 0, max: 10 }).withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
+              body('max_head_count').isInt({ min: 2, max: 10 }).withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
+              body('images').isArray({ min: 0, max: 5 }).withMessage('이미지의 url을 담은 배열이어야 합니다.')
             ], validationCheck, isAuthorized, wrap(this.addPost))
           .get('/', wrap(this.showPosts))
           .get('/me', isAuthorized, wrap(this.showMyPosts))
-          .get('/:postUid', param('postUid'), validationCheck, wrap(this.showPost))
+          .get('/:postUid', param('postUid').exists({ checkFalsy: true, checkNull: true }), validationCheck, wrap(this.showPost))
           .put('/:postUid', [
-              param('postUid'),
+              param('postUid').exists({ checkFalsy: true, checkNull: true }),
               body('title').isLength({ min: 2, max: 50 }).withMessage('글 제목은 2자 이상 50자 이하의 문자열입니다.'),
               body('description').isLength({ max: 500 }).withMessage('글 본문은 최대 500자 이하의 문자열입니다.'),
-              body('location').withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
-              body('max_head_count').withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
-              body('images').withMessage('이미지의 url을 담은 배열이어야 합니다.'),
-              body('isArchived').withMessage('boolean 값이어야 합니다.')
+              body('location').isInt({ min: 0, max: 10 }).withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
+              body('max_head_count').isInt({ min: 2, max: 10 }).withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
+              body('images').isArray({ min: 0, max: 5 }).withMessage('이미지의 url을 담은 배열이어야 합니다.'),
+              body('isArchived').isBoolean({ loose: false }).withMessage('boolean 값이어야 합니다.')
             ], validationCheck, isAuthorized, wrap(this.updatePost))
-          .delete('/:postUid', isAuthorized, wrap(this.deletePost));
+          .delete('/:postUid', param('postUid').exists({ checkFalsy: true, checkNull: true }), isAuthorized, wrap(this.deletePost));
         this.router.use(this.path, routes);
     }
 

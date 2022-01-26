@@ -31,6 +31,7 @@ export default class UserService {
   countByEmailAndPassword = async (email: string, password: string) => {
     const encryptedPassword: string = this.cryptoPassword(password);
     const user = await this.userRepository.selectUserByEmailAndPassword(email, encryptedPassword); 
+    
     return user;
   }
 
@@ -44,14 +45,14 @@ export default class UserService {
     const user_uid: string = uuidv4();
     const encryptedPassword: string = this.cryptoPassword(user.password);
 
-    const userDao: UserDao = {
-      user_uid,
-      email: user.email,
-      password: encryptedPassword,
-      nickname: user.nickname
-    };
+    const createdUser = this.userRepository.create();
 
-    await this.userRepository.create(userDao);
+    createdUser.user_uid = user_uid;
+    createdUser.email = user.email;
+    createdUser.password = encryptedPassword;
+    createdUser.nickname = user.nickname;
+  
+    this.userRepository.save(createdUser);
   }
 
   getTokens = async (email: string, password: string) => {
@@ -62,8 +63,8 @@ export default class UserService {
       throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    tokens.push(jwtSign(user, '1d', {}));
-    tokens.push(jwtSign(user, '14d', {}));
+    tokens.push(jwtSign({ user_uid: user.user_uid }, '1d', {}));
+    tokens.push(jwtSign({ user_uid: user.user_uid }, '14d', {}));
 
     this.setRefreshToken(user.user_uid, tokens[1]);
 
