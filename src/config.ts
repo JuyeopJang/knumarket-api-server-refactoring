@@ -3,7 +3,12 @@ dotenv.config();
 
 export const jwtSecret = process.env.JWT_SECRET;
 export const node_env = process.env.NODE_ENV;
+
+// s3 info
 export const bucket = process.env.S3_BUCKET;
+export const secretAccessKey = process.env.KEY;
+export const accessKeyId = process.env.KEYID;
+export const region = process.env.REGION;
 
 // db info
 export const db = process.env.DB;

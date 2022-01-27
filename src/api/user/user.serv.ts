@@ -108,12 +108,25 @@ export default class UserService {
     await this.userRepository.delete(userUid);
   }
 
-  createNewAccessToken = async () => {
+  createNewAccessToken = async (userUid: string) => {
+    const isRefreshTokenExist: boolean = await this.getRefreshTokenInRedis(userUid);
 
+    if (!isRefreshTokenExist) {
+      throw new UnauthorizedException('토큰을 재발급할 수 없습니다. 다시 로그인 해주세요');
+    }
+
+    const accessToken = jwtSign({
+      user_uid: userUid
+    }, '1d');
+
+    return accessToken;
   }
 
   getRefreshTokenInRedis = async (userUid: string) => {
-    return getRefreshToken(userUid);
+    const refreshToken = getRefreshToken(userUid);
+
+    if (refreshToken) return true;
+    return false;
   }
 
 }

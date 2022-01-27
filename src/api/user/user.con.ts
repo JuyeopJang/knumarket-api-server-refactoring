@@ -35,8 +35,8 @@ export default class UserController implements ApiController {
           .put('/me', [
               body('nickname').isLength({ min: 2, max: 10}).withMessage('닉네임은 2자 이상 10자 이하의 문자열입니다.')
             ], validationCheck, isAuthorized, wrap(this.updateMyInfo))
-          .delete('/me', isAuthorized, wrap(this.withdrawlMyInfo));
-        //   .get('/token', isAuthorized, wrap(this.reissueToken));
+          .delete('/me', isAuthorized, wrap(this.withdrawlMyInfo))
+          .get('/token', isAuthorized, wrap(this.reissueToken));
           
           this.router.use(this.path, routes);
         }
@@ -102,14 +102,12 @@ export default class UserController implements ApiController {
 
     reissueToken = async (req: Request, res: Response, next: NextFunction) => {
         const { userUid } = res.locals; 
-        const accessToken = this.userService.createNewAccessToken();
-        const refreshToken = await this.userService.getRefreshTokenInRedis(userUid);
+        const accessToken = await this.userService.createNewAccessToken(userUid);
 
         return {
             statusCode: 200,
             response: {
-                access_token: accessToken,
-                refresh_token: refreshToken
+                access_token: accessToken
             }
         };
     }
