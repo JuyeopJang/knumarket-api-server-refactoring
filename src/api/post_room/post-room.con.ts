@@ -16,6 +16,7 @@ export default class PostRoomController implements ApiController {
     private postRoomService: PostRoomService;
 
     constructor(postRoomService: PostRoomService) {
+        this.postRoomService = postRoomService;
         this.initializeRoutes();
     }
 

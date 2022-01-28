@@ -9,25 +9,28 @@ export class ImageService {
         this.imageRepository = imageRepository;
     }
 
-    deleteImageInS3 = async (imageUrl: string) => {
-        deleteImage(imageUrl);
+    deleteImageInS3 = async (key: string) => {
+        deleteImage(key);
     }
 
     deletImagesInS3 = async (postId: number) => {
-        const images = await this.imageRepository.getImagesByPostId(postId);     
+        const images = await this.imageRepository.getImagesByPostId(postId);
+        
+        console.log(images);
         
         images.forEach(image => {
-            deleteImage(image.url);
+            deleteImage(image.key);
         });
     }
 
-    getImageObjs = async (imageUrls: string[]) => {
+    getImageObjs = async (imageInfos: any) => {
         const images: Image[] = [];
 
-        imageUrls.forEach(imageUrl => {
+        imageInfos.forEach(imageInfo => {
             const image = new Image();
     
-            image.url = imageUrl;
+            image.key = imageInfo.key
+            image.url = imageInfo.url;
             images.push(image);
         });
         

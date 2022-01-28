@@ -7,6 +7,9 @@ export class Image {
     @PrimaryGeneratedColumn('uuid')
     image_uid: string;
 
+    @Column()
+    key: string;
+
     @Column({ length: 255 })    
     url: string;
 

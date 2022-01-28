@@ -43,19 +43,20 @@ export class PostRepository extends Repository<Post> {
         post.images = addPostDto.images;
         post.user = addPostDto.user;
 
-        await getRepository(Post).save(post);
+        await this.save(post);
     }
 
     getPostById = async (postUid: string) => {
-        return connection.manager.findOne(Post, postUid);
+        const post = await this.findOne(postUid);
+        return post;
     }
 
     getPosts = async (lastId: number): Promise<PostPaginationDto[]> => {
-        return await getRepository(Post).find(this.getPaginationOptions(lastId, ''));
+        return await this.find(this.getPaginationOptions(lastId, ''));
     }
 
     getMyPosts = async (lastId: number, userUid: string) => {
-        return await getRepository(Post).find(this.getPaginationOptions(lastId, userUid));
+        return await this.find(this.getPaginationOptions(lastId, userUid));
     }
 
     updatePostById = async (updatePostDto: UpdatePostDto, postId: number) => {
