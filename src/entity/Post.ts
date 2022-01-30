@@ -25,7 +25,8 @@ export class Post {
     is_archived: boolean;
 
     @OneToOne(() => PostRoom, {
-        cascade: ["insert"]
+        cascade: ["insert"],
+        eager: true
     })
     @JoinColumn()
     post_room: PostRoom;

@@ -1,6 +1,6 @@
 import { Image } from "../../entity/Image";
+import { PostRoom } from "../../entity/PostRoom";
 import { User } from "../../entity/User";
-import { AddPostRoomDto } from "./AddPostRoomDto";
 
 export class AddPostDto {
     title: string;
@@ -8,6 +8,6 @@ export class AddPostDto {
     location: number;
     max_head_count: number;
     images: Image[];
-    postRoom: AddPostRoomDto;
+    postRoom: PostRoom;
     user: User;
 }

@@ -72,6 +72,8 @@ export default class PostController implements ApiController {
             title: req.body.title,
             max_head_count: req.body.max_head_count
         }, userUid);
+
+        console.log(postRoomFromPostRoomService);
         const user = await this.userService.getUser(userUid);
             
         await this.postService.addPost({
@@ -145,10 +147,11 @@ export default class PostController implements ApiController {
 
     deletePost = async (req: Request, res: Response, next: NextFunction) => {
         const { postId } = req.params;
-        const pIdToNumber = Number(postId);
 
-        await this.imageService.deletImagesInS3(pIdToNumber);
-        await this.postService.deletePost(pIdToNumber);
+        const post = await this.postService.getPost(postId);
+
+        await this.imageService.deletImagesInS3(post.images);
+        await this.postService.deletePost(post);
     
         return {
             statusCode: 200,

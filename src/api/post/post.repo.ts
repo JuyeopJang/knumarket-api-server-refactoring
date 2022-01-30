@@ -1,6 +1,7 @@
 import { EntityRepository, FindManyOptions, getRepository, LessThan, MoreThan, Repository } from 'typeorm';
 import { node_env } from '../../config';
 import { Post } from '../../entity/Post';
+import { User } from '../../entity/User';
 import { connection } from '../../lib/database';
 import { AddPostDto } from '../dto/AddPostDto';
 import { PostPaginationDto } from '../dto/PostPaginationDto';
@@ -34,7 +35,7 @@ export class PostRepository extends Repository<Post> {
     }
 
     createPost = async (addPostDto: AddPostDto) => {
-        const post = new Post();
+        const post = this.create();
     
         post.title = addPostDto.title;
         post.description = addPostDto.description;
@@ -42,6 +43,7 @@ export class PostRepository extends Repository<Post> {
         post.max_head_count = addPostDto.max_head_count;
         post.images = addPostDto.images;
         post.user = addPostDto.user;
+        post.post_room = addPostDto.postRoom;
 
         await this.save(post);
     }
@@ -72,7 +74,7 @@ export class PostRepository extends Repository<Post> {
         await this.save(post);
     }
 
-    deletePostById = async (postUid: number) => {
-        await this.delete(postUid);
+    deletePostById = async (post: Post) => {
+        await this.remove(post);
     }
 }

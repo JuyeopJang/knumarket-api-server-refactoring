@@ -24,7 +24,7 @@ export async function startServer() {
   const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
 
   const userService = new UserService(userRepository);
-  const postService = new PostService(postRepository);
+  const postService = new PostService(postRepository, userRepository);
   const imageService = new ImageService(imageRepository);
   const postRoomService = new PostRoomService(postRoomRepository, userRepository);
 

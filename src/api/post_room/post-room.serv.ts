@@ -22,18 +22,16 @@ export class PostRoomService {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
     
-        const postRoom = this.postRoomRepository.create({
-            ...addPostRoomDto,
-            users: [user]
-        });
+        const postRoom = this.postRoomRepository.create();
+        postRoom.title = addPostRoomDto.title;
+        postRoom.max_head_count = addPostRoomDto.max_head_count;
+        
 
         if (!postRoom) {
             throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
-        await this.postRoomRepository.save(postRoom);
-
-        return postRoom;
+        return await this.postRoomRepository.save(postRoom);
     }
 
     participateUserInRoom = async (userUid: string, roomUid: string) => {
@@ -43,7 +41,9 @@ export class PostRoomService {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
-        const postRoom = await this.postRoomRepository.findOne(roomUid);
+        const postRoom = await this.postRoomRepository.findOne(roomUid, {
+            relations: ['users']
+        });
     
         if (!postRoom) {
             throw new NotFoundException('존재하지 않는 채팅 방입니다.');
@@ -61,34 +61,31 @@ export class PostRoomService {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
-        const postRoom = await this.postRoomRepository.findOne(roomUid);
+        const postRoom = await this.postRoomRepository.findOne(roomUid, {
+            relations: ['users']
+        });
     
         if (!postRoom) {
             throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
-        const indexOfUser = postRoom.users.indexOf(user);
+        // console.log(postRoom);
 
-        postRoom.users = [...postRoom.users.slice(0, indexOfUser), ...postRoom.users.slice(indexOfUser + 1)];
+        postRoom.users = postRoom.users.filter((user) => {
+            return user.user_uid !== userUid;
+        });
 
         await this.postRoomRepository.save(postRoom);
     }
 
     getMyRooms = async (userUid: string) => {
         const user = await this.userRepository.findOne(userUid);
+        console.log(user);
 
         if (!user) {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
-        const myPosts = await this.userRepository.find({
-            select: ['user_uid'],
-            where: {
-                user_uid: userUid
-            },
-            relations: ['post_room']
-        })
-
-        return myPosts;
+        return user.post_rooms;
     }
 }

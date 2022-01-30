@@ -17,11 +17,14 @@ afterAll(async () => {
 
 describe('UserController (e2e)', () => {
   const app = getServer();
+
+  console.log(app);
+
   const req = request(app);
   const userRepository = new UserRepository();
 
   const rootApiPath = '/api/users';
-
+  
   describe('회원가입: POST /api/users/signup', () => {
     const apiPath = `${rootApiPath}/sign-up`;
 
@@ -150,8 +153,8 @@ describe('UserController (e2e)', () => {
       expectResponseFailed(res);
     });
     
+    // given
     it('실패 - 비밀번호는 6글자 이상 20자 이하 입니다. (400)', async () => {
-      // given
       const headers = await fetchHeaders(req);
       const withHeaders = withHeadersBy(headers);
 

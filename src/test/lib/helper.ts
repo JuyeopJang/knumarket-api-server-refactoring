@@ -1,11 +1,38 @@
+import { getCustomRepository } from 'typeorm';
+import ImageController from '../../api/image/image.con';
+import { ImageRepository } from '../../api/image/image.repo';
+import { ImageService } from '../../api/image/image.serv';
+import PostController from '../../api/post/post.con';
+import { PostRepository } from '../../api/post/post.repo';
+import { PostService } from '../../api/post/post.serv';
+import PostRoomController from '../../api/post_room/post-room.con';
+import { PostRoomRepository } from '../../api/post_room/post-room.repo';
+import { PostRoomService } from '../../api/post_room/post-room.serv';
 import UserController from '../../api/user/user.con';
+import { UserRepository } from '../../api/user/user.repo';
+import UserService from '../../api/user/user.serv';
 import App from '../../app';
+import { node_env } from '../../config';
 // import { createUser, mockCreateDocumentDto, mockUserRaw } from './mockup.js';
 
 export function getServer() {
+  const userRepository = getCustomRepository(UserRepository, node_env);
+  const postRepository = getCustomRepository(PostRepository, node_env);
+  const imageRepository = getCustomRepository(ImageRepository, node_env);
+  const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
+
+  const userService = new UserService(userRepository);
+  const postService = new PostService(postRepository, userRepository);
+  const imageService = new ImageService(imageRepository);
+  const postRoomService = new PostRoomService(postRoomRepository, userRepository);
+
   const app = new App([
-    new UserController()
+    new UserController(userService),
+    new PostController(postService, imageService, postRoomService, userService),
+    new PostRoomController(postRoomService),
+    new ImageController(imageService)
   ]);
+  
   return app.getServer();
 }
 

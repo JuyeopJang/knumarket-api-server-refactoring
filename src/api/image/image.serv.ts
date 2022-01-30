@@ -13,8 +13,8 @@ export class ImageService {
         deleteImage(key);
     }
 
-    deletImagesInS3 = async (postId: number) => {
-        const images = await this.imageRepository.getImagesByPostId(postId);
+    deletImagesInS3 = async (images: Image[]) => {
+        // const images = await this.imageRepository.getImagesByPostId(postId);
         
         console.log(images);
         

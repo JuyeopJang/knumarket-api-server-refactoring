@@ -1,6 +1,6 @@
 import { EntityRepository, Repository } from "typeorm";
 import { Image } from "../../entity/Image";
-import { connection } from "../../lib/database";
+// import { connection } from "../../lib/database";
 
 @EntityRepository(Image)
 export class ImageRepository extends Repository<Image> {

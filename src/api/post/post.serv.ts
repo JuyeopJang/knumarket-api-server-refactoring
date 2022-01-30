@@ -12,17 +12,24 @@ import { AddPostDto } from '../dto/AddPostDto';
 import { FindManyOptions } from 'typeorm';
 import { PostPaginationDto } from '../dto/PostPaginationDto';
 import { UpdatePostDto } from '../dto/UpdatePostDto';
+import { UserRepository } from '../user/user.repo';
+import { Post } from '../../entity/Post';
 
 
 export class PostService {
 
   postRepository: PostRepository;
+  userRepository: UserRepository;
     
-  constructor(postRepository: PostRepository) {
+  constructor(postRepository: PostRepository, userRepository: UserRepository) {
     this.postRepository = postRepository;
+    this.userRepository = userRepository;
   }
 
   addPost = async (addPostDto: AddPostDto) => {
+    addPostDto.user.post_rooms.push(addPostDto.postRoom);
+    await this.userRepository.save(addPostDto.user);
+
     return this.postRepository.createPost(addPostDto);
   }
   
@@ -42,9 +49,8 @@ export class PostService {
     return this.postRepository.updatePostById(updatePostDto, postUid);
   }
 
-  deletePost = async (postUid: number) => {
-    
-    return this.postRepository.deletePostById(postUid);
+  deletePost = async (post: Post) => {
+    return this.postRepository.deletePostById(post);
   }
 
 }
