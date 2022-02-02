@@ -98,7 +98,7 @@ describe('ImageController (e2e)', () => {
     it('성공 - 삭제 (200)', async () => {
         const headers = await fetchHeaders(req);
         const withHeaders = withHeadersBy(headers);
-        const res = await withHeaders(req.delete(rootApiPath)).set('authorization', accessToken).send({ key }).expect(200);
+        const res = await withHeaders(req.delete(rootApiPath)).set('authorization', accessToken).send({ key: key }).expect(200);
         const result = res.body.response;
         expectResponseSucceed(res);
 
