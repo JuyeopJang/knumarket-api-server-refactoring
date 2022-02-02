@@ -19,6 +19,11 @@ jobs:
       DB_PORT: ${{ secrets.DB_PORT }}
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      KEY: ${{ secrets.KEY }}
+      KEYID: ${{ secrets.KEYID }}
+      REGION: ${{ secrets.REGION }}
+
 
     runs-on: ubuntu-latest
 
