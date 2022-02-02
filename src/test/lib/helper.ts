@@ -1,4 +1,4 @@
-import { getCustomRepository } from 'typeorm';
+import { Connection, getConnection, getCustomRepository } from 'typeorm';
 import ImageController from '../../api/image/image.con';
 import { ImageRepository } from '../../api/image/image.repo';
 import { ImageService } from '../../api/image/image.serv';
@@ -13,13 +13,12 @@ import { UserRepository } from '../../api/user/user.repo';
 import UserService from '../../api/user/user.serv';
 import App from '../../app';
 import { node_env } from '../../config';
-// import { createUser, mockCreateDocumentDto, mockUserRaw } from './mockup.js';
 
-export function getServer() {
-  const userRepository = getCustomRepository(UserRepository, node_env);
-  const postRepository = getCustomRepository(PostRepository, node_env);
-  const imageRepository = getCustomRepository(ImageRepository, node_env);
-  const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
+export function getServer(connection: Connection) {
+  const userRepository = connection.getCustomRepository(UserRepository);
+  const postRepository = connection.getCustomRepository(PostRepository);
+  const imageRepository = connection.getCustomRepository(ImageRepository);
+  const postRoomRepository = connection.getCustomRepository(PostRoomRepository);
 
   const userService = new UserService(userRepository);
   const postService = new PostService(postRepository, userRepository);
@@ -32,8 +31,14 @@ export function getServer() {
     new PostRoomController(postRoomService),
     new ImageController(imageService)
   ]);
-  
-  return app.getServer();
+
+  return {
+    app: app.getServer(),
+    userRepository,
+    postRepository,
+    imageRepository,
+    postRoomRepository
+  }
 }
 
 export function expectResponseSucceed(res) {

@@ -52,7 +52,7 @@ export default class UserService {
     createdUser.password = encryptedPassword;
     createdUser.nickname = user.nickname;
   
-    this.userRepository.save(createdUser);
+    await this.userRepository.save(createdUser);
   }
 
   getTokens = async (email: string, password: string) => {

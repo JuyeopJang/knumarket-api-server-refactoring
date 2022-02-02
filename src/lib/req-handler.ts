@@ -6,7 +6,7 @@ export const wrap = (handler) => {
             const { statusCode, response } = await handler(req, res, next);
             
             res.status(statusCode).json({
-                suceess: true,
+                success: true,
                 response,
                 error: null
             });

@@ -16,12 +16,12 @@ export class UserRepository extends Repository<User> {
     return cnt;
   }
 
-    findByEmail = async (email: string) => {
-      return getConnection(node_env)
-        .getRepository(User)
-        .findOne({ where: {
-          email
-        }});
+    async findByEmail(email: string) {
+      return this.findOne({
+        where: {
+          email: email
+        }
+      });
     }
 
     createUser = async (user: UserDao) => {

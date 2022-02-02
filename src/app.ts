@@ -5,9 +5,10 @@ import helmet from 'helmet';
 import ApiController from './api/interfaces/ApiController';
 import morgan from 'morgan';
 import { errorMiddleware } from './middlewares/error.middleware';
+import { Express } from 'express-serve-static-core';
 
 class App {
-    private app;
+    private app: Express;
     
     constructor(controllers: ApiController[]) {
         this.app = express();

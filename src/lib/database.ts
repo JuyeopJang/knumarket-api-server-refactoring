@@ -1,4 +1,4 @@
-import { createConnection, Connection } from "typeorm";
+import { createConnection, Connection, getConnectionOptions } from "typeorm";
 import { createClient } from "redis";
 import { node_env } from "../config";
 
@@ -14,6 +14,8 @@ export const initializeDatabase = async () => {
     redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
     await redisClient.connect();
+
+    return connection;
 };
 
 export const closeDatabase = async () => {

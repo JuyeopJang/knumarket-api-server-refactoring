@@ -45,7 +45,7 @@ export default class UserController implements ApiController {
         await this.userService.signUp(req.body);
 
         return {
-            statusCode: 200,
+            statusCode: 201,
             response: '회원가입에 성공했습니다.'
         };
     }
