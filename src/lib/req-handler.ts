@@ -11,7 +11,6 @@ export const wrap = (handler) => {
                 error: null
             });
         } catch (err) {
-            console.log(err);
             next(err);
         }
     }
