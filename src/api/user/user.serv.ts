@@ -6,7 +6,7 @@ import { PostRepository } from '../post/post.repo';
 import { UserDao } from '../interfaces/dao/UserDao.js';
 import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
-import { getRefreshToken, setRefreshToken } from '../../lib/redis';
+// import { getRefreshToken, setRefreshToken } from '../../lib/redis';
 import { NotFoundException } from '../../common/exceptions/not-found.exception';
 
 export default class UserService {
@@ -80,7 +80,7 @@ export default class UserService {
   }
 
   setRefreshToken = (userUid: string, refreshToken: string) => {
-    setRefreshToken(userUid, refreshToken);
+    // setRefreshToken(userUid, refreshToken);
   }
 
   getMyInfo = async (userUid: string) => {
@@ -109,24 +109,24 @@ export default class UserService {
   }
 
   createNewAccessToken = async (userUid: string) => {
-    const isRefreshTokenExist: boolean = await this.getRefreshTokenInRedis(userUid);
+    // const isRefreshTokenExist: boolean = await this.getRefreshTokenInRedis(userUid);
 
-    if (!isRefreshTokenExist) {
-      throw new UnauthorizedException('토큰을 재발급할 수 없습니다. 다시 로그인 해주세요');
-    }
+    // if (!isRefreshTokenExist) {
+    //   throw new UnauthorizedException('토큰을 재발급할 수 없습니다. 다시 로그인 해주세요');
+    // }
 
-    const accessToken = jwtSign({
-      user_uid: userUid
-    }, '1d');
+    // const accessToken = jwtSign({
+    //   user_uid: userUid
+    // }, '1d');
 
-    return accessToken;
+    // return accessToken;
   }
 
   getRefreshTokenInRedis = async (userUid: string) => {
-    const refreshToken = getRefreshToken(userUid);
+    // const refreshToken = getRefreshToken(userUid);
 
-    if (refreshToken) return true;
-    return false;
+    // if (refreshToken) return true;
+    // return false;
   }
 
 }

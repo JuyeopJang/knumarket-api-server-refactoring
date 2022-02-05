@@ -291,46 +291,46 @@ describe('UserController (e2e)', () => {
     });
   });
 
-  describe('액세스 토큰 재발급: GET /api/users/token', () => {
-    const loginPath = `${rootApiPath}/login`
-    const apiPath = `${rootApiPath}/token`;
+  // describe('액세스 토큰 재발급: GET /api/users/token', () => {
+  //   const loginPath = `${rootApiPath}/login`
+  //   const apiPath = `${rootApiPath}/token`;
 
-    it('성공 - 토큰 재발급 (200)', async () => {
-      // login
-      const headers = await fetchHeaders(req);
-      const withHeaders = withHeadersBy(headers);
-      const mockUser = new LoginFakeUser();
+  //   it('성공 - 토큰 재발급 (200)', async () => {
+  //     // login
+  //     const headers = await fetchHeaders(req);
+  //     const withHeaders = withHeadersBy(headers);
+  //     const mockUser = new LoginFakeUser();
 
-      const res = await withHeaders(req.post(loginPath)).send(mockUser).expect(200);
-      const { refresh_token } = res.body.response;
+  //     const res = await withHeaders(req.post(loginPath)).send(mockUser).expect(200);
+  //     const { refresh_token } = res.body.response;
 
-      // get myinfo
-      const myInfo = await withHeaders(req.get(apiPath)).set('authorization', refresh_token).expect(200);
-      expect(myInfo.body.response).toHaveProperty('access_token');
-    });
+  //     // get myinfo
+  //     const myInfo = await withHeaders(req.get(apiPath)).set('authorization', refresh_token).expect(200);
+  //     expect(myInfo.body.response).toHaveProperty('access_token');
+  //   });
 
-    it('실패 - 토큰이 유효하지 않습니다. (401)', async () => {
-      // given
-      const headers = await fetchHeaders(req);
-      const withHeaders = withHeadersBy(headers);
+  //   it('실패 - 토큰이 유효하지 않습니다. (401)', async () => {
+  //     // given
+  //     const headers = await fetchHeaders(req);
+  //     const withHeaders = withHeadersBy(headers);
 
-      const res = await withHeaders(req.get(apiPath)).set('authorization', 'dksaekjriwh.dasjdhjasd.dsakdaskjds').expect(401);
+  //     const res = await withHeaders(req.get(apiPath)).set('authorization', 'dksaekjriwh.dasjdhjasd.dsakdaskjds').expect(401);
 
-      expect(res.body.error).toHaveProperty('status', 401);
-      expect(res.body.error).toHaveProperty('message', '토큰이 유효하지 않습니다. 리프레시 토큰을 보냈다면 다시 로그인 해주세요.');
-    });
+  //     expect(res.body.error).toHaveProperty('status', 401);
+  //     expect(res.body.error).toHaveProperty('message', '토큰이 유효하지 않습니다. 리프레시 토큰을 보냈다면 다시 로그인 해주세요.');
+  //   });
     
-    it('실패 - 토큰이 존재하지 않습니다. (400)', async () => {
-      // given
-      const headers = await fetchHeaders(req);
-      const withHeaders = withHeadersBy(headers);
+  //   it('실패 - 토큰이 존재하지 않습니다. (400)', async () => {
+  //     // given
+  //     const headers = await fetchHeaders(req);
+  //     const withHeaders = withHeadersBy(headers);
 
-      const res = await withHeaders(req.get(apiPath)).set('authorization', '').expect(400);
+  //     const res = await withHeaders(req.get(apiPath)).set('authorization', '').expect(400);
 
-      expect(res.body.error).toHaveProperty('status', 400);
-      expect(res.body.error).toHaveProperty('message', 'req header에 authorization이 존재하지 않습니다.');
-    });
-  });
+  //     expect(res.body.error).toHaveProperty('status', 400);
+  //     expect(res.body.error).toHaveProperty('message', 'req header에 authorization이 존재하지 않습니다.');
+  //   });
+  // });
 
   describe('회원 탈퇴: DELETE /api/users/me', () => {
     const loginPath = `${rootApiPath}/login`
