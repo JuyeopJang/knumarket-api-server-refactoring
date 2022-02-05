@@ -10,5 +10,5 @@ ADD . .
 
 EXPOSE 5000
 
-ENTRYPOINT ["npm", "run", "deploy"]
+CMD ["npm", "run", "deploy"]
 
