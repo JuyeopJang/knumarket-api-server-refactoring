@@ -35,7 +35,16 @@ export async function startServer() {
     new ImageController(imageService)
   ]);
 
-  app.listen();
+  const server = app.listen();
+
+  process.on('SIGINT', () => {
+    app.setIsDisableKeepAlive(true);
+    server.close(() => {
+      console.log('server closed');
+      process.exit(0);
+    })
+  });
+  
   return app;
 };
 

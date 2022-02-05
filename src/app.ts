@@ -1,4 +1,4 @@
-import express, { Request, Response, Router } from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import bodyParser from 'body-parser';
 // import csurf from 'csurf';
 import helmet from 'helmet';
@@ -9,6 +9,7 @@ import { Express } from 'express-serve-static-core';
 
 class App {
     private app: Express;
+    private isDisableKeepAlive = false;
     
     constructor(controllers: ApiController[]) {
         this.app = express();
@@ -19,6 +20,12 @@ class App {
     }
 
     initializeMiddlewares() {
+        this.app.use((req: Request, res: Response, next: NextFunction) => {
+            if (this.isDisableKeepAlive) {
+                res.set('Connection', 'close');
+            }
+            next();
+        })
         this.app.use(bodyParser.json());
         this.app.use(helmet());
         this.app.use(morgan("combined"));
@@ -42,13 +49,21 @@ class App {
 
     listen() {
         const port: number = Number(process.env.PORT) || 5000;
-        this.app.listen(port, () => {
+        return this.app.listen(port, () => {
             console.log(`App listening on the port ${port}`);
         });
     }
 
     getServer() {
         return this.app;
+    }
+
+    getIsDisableKeepAlive() {
+        return this.isDisableKeepAlive;
+    }
+
+    setIsDisableKeepAlive(isDisableKeepAlive: boolean) {
+        this.isDisableKeepAlive = isDisableKeepAlive;
     }
 }
 

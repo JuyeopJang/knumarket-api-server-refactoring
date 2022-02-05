@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1643796864295" clover="3.2.0">
-  <project timestamp="1643796864295" name="All files">
-    <metrics statements="597" coveredstatements="463" conditionals="54" coveredconditionals="21" methods="199" coveredmethods="127" elements="850" coveredelements="611" complexity="0" loc="597" ncloc="597" packages="11" files="37" classes="37"/>
+<coverage generated="1643798123713" clover="3.2.0">
+  <project timestamp="1643798123713" name="All files">
+    <metrics statements="596" coveredstatements="462" conditionals="54" coveredconditionals="21" methods="199" coveredmethods="127" elements="849" coveredelements="610" complexity="0" loc="596" ncloc="596" packages="11" files="37" classes="37"/>
     <package name="knumarket-api-server-refactoring">
       <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="ormconfig.ts" path="/Users/juyeop/Desktop/Juyeop/knumarket/knumarket-api-server-refactoring/ormconfig.ts">
@@ -567,7 +567,7 @@
       </file>
     </package>
     <package name="knumarket-api-server-refactoring.src.lib">
-      <metrics statements="45" coveredstatements="45" conditionals="4" coveredconditionals="3" methods="18" coveredmethods="17"/>
+      <metrics statements="44" coveredstatements="44" conditionals="4" coveredconditionals="3" methods="18" coveredmethods="17"/>
       <file name="database.ts" path="/Users/juyeop/Desktop/Juyeop/knumarket/knumarket-api-server-refactoring/src/lib/database.ts">
         <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="5" coveredmethods="4"/>
         <line num="1" count="2" type="stmt"/>
@@ -619,14 +619,13 @@
         <line num="8" count="1" type="stmt"/>
       </file>
       <file name="req-handler.ts" path="/Users/juyeop/Desktop/Juyeop/knumarket/knumarket-api-server-refactoring/src/lib/req-handler.ts">
-        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
         <line num="3" count="2" type="stmt"/>
         <line num="4" count="34" type="stmt"/>
         <line num="5" count="17" type="stmt"/>
         <line num="6" count="17" type="stmt"/>
         <line num="8" count="15" type="stmt"/>
         <line num="14" count="2" type="stmt"/>
-        <line num="15" count="2" type="stmt"/>
       </file>
     </package>
     <package name="knumarket-api-server-refactoring.src.middlewares">
