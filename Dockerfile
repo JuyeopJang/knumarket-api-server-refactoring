@@ -3,6 +3,7 @@ FROM node:14
 WORKDIR /usr
 
 COPY package*.json ./
+COPY .env ./
 
 RUN npm install -g pm2 && pm2 install typescript && npm install
 
