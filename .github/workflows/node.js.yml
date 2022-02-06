@@ -76,7 +76,7 @@ jobs:
         aws_access_key: ${{ secrets.KEYID }}
         aws_secret_key: ${{ secrets.KEY }}
         application_name: knumarket-api-server
-        environment_name: Knumarketapiserver-env
+        environment_name: Knumarketapiserver-env-1
         version_label: "knumarket-api-server${{ steps.format-time.outputs.replaced }}"
         region: ${{ secrets.REGION }}
         deployment_package: deploy.zip
