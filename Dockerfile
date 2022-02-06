@@ -10,5 +10,4 @@ ADD . .
 
 EXPOSE 5000
 
-CMD ["npm", "run", "deploy"]
-
+CMD ["pm2-runtime", "start", "ecosystem.config.js"]
