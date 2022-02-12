@@ -24,7 +24,10 @@ module.exports = [
     "entities": ["src/entity/**/*.ts"],
     "dropSchema": true,
     "logging": ["error"],
-    "maxQueryExecutionTime": 1000
+    "maxQueryExecutionTime": 1000,
+    "extra": {
+      "connectionLimit": 150
+    }
   },
   {
     "name": "production",
