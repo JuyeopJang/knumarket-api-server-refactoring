@@ -26,7 +26,7 @@ module.exports = [
     "logging": ["error"],
     "maxQueryExecutionTime": 1000,
     "extra": {
-      "connectionLimit": 150
+      "connectionLimit": 500
     }
   },
   {
