@@ -1,18 +1,39 @@
 import { User } from '../../entity/User';
-import { EntityRepository, FindConditions, FindOneOptions, getConnection, ObjectID, Repository } from 'typeorm';
-import { UserDao } from '../interfaces/dao/UserDao';
-import { node_env } from '../../config';
+import { EntityRepository, Repository } from 'typeorm';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+
+  createUser(
+    userUid: string,
+    email: string,
+    password: string,
+    nickname: string
+  ) {
+    const user = this.create();
+
+    user.user_uid = userUid;
+    user.email = email;
+    user.password = password;
+    user.nickname = nickname;
     
-  countByEmail = async (email: string) => {
-    const { cnt } = await getConnection(node_env)
-      .createQueryBuilder()
-      .select("COUNT(user.user_uid) AS cnt")
-      .from(User, "user")
+    return user;
+  }
+
+  insertUser(user: User) {
+    return this.createQueryBuilder()
+      .insert()
+      .into(User, ['user_uid', 'email', 'password', 'nickname'])
+      .values(user)
+      .execute();
+  }
+    
+  async countByEmail(email: string) {
+    const { cnt } = await this.createQueryBuilder()
+      .select("COUNT(user.user_uid)", "cnt")
       .where("user.email = :email", { email })
-      .getRawOne()
+      .getRawOne();
+
     return cnt;
   }
 
@@ -24,19 +45,30 @@ export class UserRepository extends Repository<User> {
       });
     }
 
-    createUser = async (user: UserDao) => {
-      return await getConnection(node_env)
-        .createQueryBuilder()
-        .insert()
-        .into(User)
-        .values(user)
-        .execute();
-    }
-
-    selectUserByEmailAndPassword = async (email: string, password: string) => {
-      return this.findOne({
+  findUserByEmailAndPassword(email: string, password: string) {
+    return this.findOne({
+      select: ["user_uid"],
+      where: {
         email,
         password
-      });
-    }
+      }
+    });
+  }
+
+  findUserById(userUid: string) {
+    return this.findOne({
+      select: ["email", "nickname", "is_verified"],
+      where: {
+        user_uid: userUid
+      }
+    });
+  }
+
+  updateNickname(nickname: string, userUid: string) {
+    return this.createQueryBuilder()
+      .update()
+      .set({ nickname })
+      .where("user_uid = :userUid", { userUid })
+      .execute();
+  }
 }

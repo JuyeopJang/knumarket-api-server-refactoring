@@ -38,16 +38,16 @@ export default class UserController implements ApiController {
           .delete('/me', isAuthorized, wrap(this.withdrawlMyInfo))
           .get('/token', isAuthorized, wrap(this.reissueToken));
           
-          this.router.use(this.path, routes);
-        }
+        this.router.use(this.path, routes);
+    }
 
     signUp = async (req: Request, res: Response, next: NextFunction) => {
-        await this.userService.signUp(req.body);
-
-        return {
-            statusCode: 201,
-            response: '회원가입에 성공했습니다.'
-        };
+      await this.userService.signUp(req.body);  
+      
+      return {
+        statusCode: 201,
+        response: '회원가입에 성공했습니다.'
+      };
     }
 
     login = async (req: Request, res: Response, next: NextFunction) => {
@@ -63,19 +63,15 @@ export default class UserController implements ApiController {
         };
     }
 
-    getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
-        const { userUid } = res.locals;
-        const userInfo = await this.userService.getMyInfo(userUid);
-        
-        return {
-            statusCode: 200,
-            response: {
-                email: userInfo.email,
-                nickname: userInfo.nickname,
-                is_verified: userInfo.is_verified
-            }
-        };
-    }
+  getMyInfo = async (req: Request, res: Response, next: NextFunction) => {
+    const { userUid } = res.locals;
+    const user = await this.userService.getMyInfo(userUid);
+    
+    return {
+      statusCode: 200,
+      response: user
+    };
+  }
 
     updateMyInfo = async (req: Request, res: Response, next: NextFunction) => {
         const { nickname } = req.body;

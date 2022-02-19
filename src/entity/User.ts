@@ -9,7 +9,7 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     user_uid: string;
 
-    @Index()
+    @Index({ unique: true })
     @Column({ length: 50 })
     @IsEmail()
     email: string;
@@ -23,16 +23,13 @@ export class User {
     @Column({ default: false })
     is_verified: boolean;
 
-    @OneToMany(() => Post, post => post.user, {
-        eager: true
-    })
+    @OneToMany(() => Post, post => post.user)
     posts: Post[]
 
-    @ManyToMany(() => PostRoom, postRoom => postRoom.users, {
-        eager: true
-    })
+    @ManyToMany(() => PostRoom, postRoom => postRoom.users)
     post_rooms: PostRoom[]
 
+    @Index()
     @Column({ default: () => 'CURRENT_TIMESTAMP '})
     created_at: Date;
     

@@ -3,16 +3,14 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { param } from "express-validator";
 import { isAuthorized } from "../../middlewares/auth.middleware";
 import { PostRoomService } from "./post-room.serv";
-import { PostRoomRepository } from "./post-room.repo";
-import { UserRepository } from "../user/user.repo";
 import { validationCheck } from "../../middlewares/validation.middleware";
 import { wrap } from "../../lib/req-handler";
 
 
 export default class PostRoomController implements ApiController {
 
-    path: string = "/rooms";
-    router: Router = Router();
+    path = "/rooms";
+    router = Router();
     private postRoomService: PostRoomService;
 
     constructor(postRoomService: PostRoomService) {

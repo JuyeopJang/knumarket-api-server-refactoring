@@ -1,6 +1,4 @@
-import { getManager, Transaction, TransactionManager } from "typeorm";
 import { NotFoundException } from "../../common/exceptions/not-found.exception";
-import { node_env } from "../../config";
 import { AddPostRoomDto } from "../dto/AddPostRoomDto";
 import { UserRepository } from "../user/user.repo";
 import { PostRoomRepository } from "./post-room.repo";
@@ -10,7 +8,7 @@ export class PostRoomService {
     postRoomRepository: PostRoomRepository;
     userRepository: UserRepository;
 
-    constructor(postRoomRepository: PostRoomRepository, userRepository: UserRepository) {
+    constructor(postRoomRepository, userRepository) {
         this.postRoomRepository = postRoomRepository;
         this.userRepository = userRepository;
     }
@@ -69,8 +67,6 @@ export class PostRoomService {
             throw new NotFoundException('존재하지 않는 채팅 방입니다.');
         }
 
-        // console.log(postRoom);
-
         postRoom.users = postRoom.users.filter((user) => {
             return user.user_uid !== userUid;
         });
@@ -78,14 +74,7 @@ export class PostRoomService {
         await this.postRoomRepository.save(postRoom);
     }
 
-    getMyRooms = async (userUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
-        console.log(user);
-
-        if (!user) {
-            throw new NotFoundException('존재하지 않는 회원입니다.');
-        }
-
-        return user.post_rooms;
-    }
+  async getMyRooms(userUid: string) {
+    return await this.postRoomRepository.findPostRoomsByUserId(userUid);
+  }
 }

@@ -26,7 +26,7 @@ export class PostService {
     this.userRepository = userRepository;
   }
 
-  addPost = async (addPostDto: AddPostDto) => {
+  async addPost(addPostDto: AddPostDto) {
     addPostDto.user.post_rooms.push(addPostDto.postRoom);
     await this.userRepository.save(addPostDto.user);
 
