@@ -62,15 +62,15 @@ export default class UserService {
 
   async getTokens(email: string, password: string) {
     const encryptedPassword: string = this.cryptoPassword(password);
-    const { user_uid } = await this.userRepository.findUserByEmailAndPassword(email, encryptedPassword);
+    const user = await this.userRepository.findUserByEmailAndPassword(email, encryptedPassword);
     let tokens: string[] = [];
 
-    if (!user_uid) {
+    if (!user) {
       throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
     }
 
-    tokens.push(jwtSign({ user_uid }, '1d', {}));
-    tokens.push(jwtSign({ user_uid }, '14d', {}));
+    tokens.push(jwtSign({ ...user }, '1d', {}));
+    tokens.push(jwtSign({ ...user }, '14d', {}));
 
     // this.setRefreshToken(userUid, tokens[1]);
 
@@ -107,7 +107,6 @@ export default class UserService {
 
     try {
       await queryRunner.manager.getCustomRepository(UserRepository).updateNickname(nickname, userUid);
-
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -119,11 +118,25 @@ export default class UserService {
   }
 
   signOut = async (userUid: string) => {
-    const user = await this.userRepository.findOne(userUid);
+    const user = await this.userRepository.findUserById(userUid);
   
     if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
 
-    await this.userRepository.delete(userUid);
+    const queryRunner = this.connection.createQueryRunner();
+    
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.getCustomRepository(UserRepository).deleteUser(userUid);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      
+      throw new ServerException('서버 오류로 닉네임 변경에 실패했습니다. 다시 시도해주세요');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   createNewAccessToken = async (userUid: string) => {

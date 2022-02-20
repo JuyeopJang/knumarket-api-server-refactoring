@@ -71,4 +71,11 @@ export class UserRepository extends Repository<User> {
       .where("user_uid = :userUid", { userUid })
       .execute();
   }
+
+  deleteUser(userUid: string) {
+    return this.createQueryBuilder()
+      .softDelete()
+      .where("user_uid = :userUid", { userUid })
+      .execute();
+  }
 }
