@@ -21,26 +21,17 @@ export class Post {
     @Column()
     max_head_count: number;
 
-    @Column()
+    @Column({ default: false })
     is_archived: boolean;
 
-    @OneToOne(() => PostRoom, {
-        cascade: ["insert"],
-        eager: true
-    })
+    @OneToOne(() => PostRoom)
     @JoinColumn()
     post_room: PostRoom;
 
-    @ManyToOne(() => User, user => user.posts, {
-        onDelete: 'CASCADE',
-        cascade: ["insert", "remove"]
-    })
+    @ManyToOne(() => User, user => user.posts)
     user: User;
 
-    @OneToMany(() => Image, image => image.post, {
-        cascade: ["insert", "remove", "update"], // image entity에
-        eager: true
-    })
+    @OneToMany(() => Image, image => image.post)
     images: Image[]
 
     @Column({ default: () => 'CURRENT_TIMESTAMP '})

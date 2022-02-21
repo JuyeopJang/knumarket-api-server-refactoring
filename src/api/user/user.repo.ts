@@ -25,7 +25,22 @@ export class UserRepository extends Repository<User> {
       .insert()
       .into(User, ['user_uid', 'email', 'password', 'nickname'])
       .values(user)
+      .updateEntity(false)
       .execute();
+  }
+
+  relatePostOfUser(userUid: string, postId: number) {
+    return this.createQueryBuilder()
+      .relation(User, "posts")
+      .of(userUid)
+      .add(postId);
+  }
+
+  relateRoomOfUser(userUid: string, roomId: string) {
+    return this.createQueryBuilder()
+      .relation(User, "post_rooms")
+      .of(userUid)
+      .add(roomId);
   }
     
   async countByEmail(email: string) {

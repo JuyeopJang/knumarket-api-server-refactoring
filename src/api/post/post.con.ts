@@ -47,40 +47,29 @@ export default class PostController implements ApiController {
               body('location').isInt({ min: 0, max: 10 }).withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
               body('max_head_count').isInt({ min: 2, max: 10 }).withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
               body('images').isArray({ min: 0, max: 5 }).withMessage('이미지의 url을 담은 배열이어야 합니다.')
-            ], validationCheck, isAuthorized, wrap(this.addPost))
+            ], validationCheck, isAuthorized, wrap(this.writePost))
           .get('/', wrap(this.showPosts))
           .get('/me', isAuthorized, wrap(this.showMyPosts))
           .get('/:postUid', param('postUid').exists({ checkFalsy: true, checkNull: true }), validationCheck, wrap(this.showPost))
-          .put('/:postUid', [
-              param('postUid').exists({ checkFalsy: true, checkNull: true }),
-              body('title').isLength({ min: 2, max: 50 }).withMessage('글 제목은 2자 이상 50자 이하의 문자열입니다.'),
-              body('description').isLength({ max: 500 }).withMessage('글 본문은 최대 500자 이하의 문자열입니다.'),
-              body('location').isInt({ min: 0, max: 10 }).withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
-              body('max_head_count').isInt({ min: 2, max: 10 }).withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
-              body('images').isArray({ min: 0, max: 5 }).withMessage('이미지의 url을 담은 배열이어야 합니다.'),
-              body('isArchived').isBoolean({ loose: false }).withMessage('boolean 값이어야 합니다.')
-            ], validationCheck, isAuthorized, wrap(this.updatePost))
+        //   .put('/:postUid', [
+        //       param('postUid').exists({ checkFalsy: true, checkNull: true }),
+        //       body('title').isLength({ min: 2, max: 50 }).withMessage('글 제목은 2자 이상 50자 이하의 문자열입니다.'),
+        //       body('description').isLength({ max: 500 }).withMessage('글 본문은 최대 500자 이하의 문자열입니다.'),
+        //       body('location').isInt({ min: 0, max: 10 }).withMessage('위치로 가능한 값은 0 ~ 10 사이의 숫자 입니다.'),
+        //       body('max_head_count').isInt({ min: 2, max: 10 }).withMessage('모집 가능 인원은 최소 2명부터 최대 10명까지 입니다.'),
+        //       body('images').isArray({ min: 0, max: 5 }).withMessage('이미지의 url을 담은 배열이어야 합니다.'),
+        //       body('isArchived').isBoolean({ loose: false }).withMessage('boolean 값이어야 합니다.')
+        //     ], validationCheck, isAuthorized, wrap(this.updatePost))
           .delete('/:postUid', param('postUid').exists({ checkFalsy: true, checkNull: true }), isAuthorized, wrap(this.deletePost));
         this.router.use(this.path, routes);
     }
 
-    addPost = async (req: Request, res: Response, next: NextFunction) => {
-        const { images } = req.body;
+    writePost = async (req: Request, res: Response, next: NextFunction) => {
         const { userUid } = res.locals;
-        const imagesFromImageService = await this.imageService.getImageObjs(images);
-        const postRoomFromPostRoomService = await this.postRoomService.getPostRoom({
-            title: req.body.title,
-            max_head_count: req.body.max_head_count
-        }, userUid);
-
-        console.log(postRoomFromPostRoomService);
-        const user = await this.userService.getUser(userUid);
             
-        await this.postService.addPost({
+        await this.postService.createPostAndRoom({
             ...req.body,
-            images: imagesFromImageService,
-            postRoom: postRoomFromPostRoomService,
-            user
+            userUid
         });
 
         return {
@@ -91,9 +80,7 @@ export default class PostController implements ApiController {
 
     showPosts = async (req: Request, res: Response, next: NextFunction) => {
         const { last_id } = req.query;
-        let posts: PostPaginationDto[];
-        
-        posts = await this.postService.getPosts(Number(last_id));
+        const posts = await this.postService.getPosts(Number(last_id));
 
         return {
             statusCode: 200,
@@ -106,7 +93,7 @@ export default class PostController implements ApiController {
 
     showPost = async (req: Request, res: Response, next: NextFunction) => {
         const { postUid } = req.params;
-        const post: Post = await this.postService.getPost(postUid);
+        const post = await this.postService.getPost(Number(postUid));
 
         return {
             statusCode: 200,
@@ -117,8 +104,7 @@ export default class PostController implements ApiController {
     showMyPosts = async (req: Request, res: Response, next: NextFunction) => {
         const { last_id } = req.query;
         const { userUid } = res.locals;
-        let myPosts: Post[];
-        myPosts = await this.postService.getMyPosts(Number(last_id), userUid);
+        const myPosts = await this.postService.getMyPosts(Number(last_id), userUid);
         
         return {
             statusCode: 200,
@@ -129,26 +115,26 @@ export default class PostController implements ApiController {
         };
     }
 
-    updatePost = async (req: Request, res: Response, next: NextFunction) => {
-        const { postUid } = req.params;
-        const { images } = req.body;
-        const imagesFromImageService = await this.imageService.getImageObjs(images);
+    // updatePost = async (req: Request, res: Response, next: NextFunction) => {
+    //     const { postUid } = req.params;
+    //     const { images } = req.body;
+    //     const imagesFromImageService = await this.imageService.getImageObjs(images);
 
-        await this.postService.updatePost({
-            ...req.body,
-            images: imagesFromImageService
-        }, Number(postUid));
+    //     await this.postService.updatePost({
+    //         ...req.body,
+    //         images: imagesFromImageService
+    //     }, Number(postUid));
 
-        return {
-            statusCode: 200,
-            response: '글이 성공적으로 수정 되었습니다.'
-        };
-    }
+    //     return {
+    //         statusCode: 200,
+    //         response: '글이 성공적으로 수정 되었습니다.'
+    //     };
+    // }
 
     deletePost = async (req: Request, res: Response, next: NextFunction) => {
         const { postId } = req.params;
 
-        const post = await this.postService.getPost(postId);
+        const post = await this.postService.getPost(Number(postId));
 
         await this.imageService.deletImagesInS3(post.images);
         await this.postService.deletePost(post);

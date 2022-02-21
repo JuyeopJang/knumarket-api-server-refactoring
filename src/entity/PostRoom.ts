@@ -18,9 +18,7 @@ export class PostRoom {
     })
     current_head_count: number;
 
-    @ManyToMany(() => User, user => user.post_rooms, {
-        cascade: ["insert", "remove", "update"]
-    })
+    @ManyToMany(() => User, user => user.post_rooms)
     @JoinTable()
     users: User[]
 

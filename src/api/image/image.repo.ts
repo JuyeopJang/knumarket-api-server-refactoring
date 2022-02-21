@@ -4,6 +4,7 @@ import { Image } from "../../entity/Image";
 
 @EntityRepository(Image)
 export class ImageRepository extends Repository<Image> {
+
     getImagesByPostId = async (postId: number) => {
         return await this.find({
             where: {
@@ -11,4 +12,13 @@ export class ImageRepository extends Repository<Image> {
             }  
         });
     }
+
+  insertImage(image_uid: string, key: string, url: string) {
+    return this.createQueryBuilder()
+      .insert()
+      .into(Image, ['image_uid', 'key', 'url'])
+      .values({ image_uid, key, url })
+      .updateEntity(false)
+      .execute();
+  }
 }
