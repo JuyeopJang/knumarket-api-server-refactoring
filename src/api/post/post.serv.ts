@@ -1,43 +1,37 @@
 import { v4 as uuidv4 } from 'uuid';
-import { BadRequestException, ServerException, UnauthorizedException } from '../../common/exceptions/';
-import crypto from 'crypto';
-// import * as jwt from '../../lib/jwt.js';
-// import { UserRepository } from './user.repo';
+import { ServerException } from '../../common/exceptions/';
 import { PostRepository } from '../post/post.repo';
-import { ConflictException } from '../../common/exceptions/conflict.exception';
-import { jwtSign } from '../../lib/jwt';
-// import { getRefreshToken, setRefreshToken } from '../../lib/redis';
-// import { redisClient } from '../../lib/database';
 import { AddPostDto } from '../dto/AddPostDto';
 import { Connection } from 'typeorm';
-import { PostPaginationDto } from '../dto/PostPaginationDto';
-import { UpdatePostDto } from '../dto/UpdatePostDto';
 import { UserRepository } from '../user/user.repo';
 import { Post } from '../../entity/Post';
-import { max } from 'class-validator';
 import { PostRoomRepository } from '../post_room/post-room.repo';
 import { ImageRepository } from '../image/image.repo';
-import { image } from 'faker';
-
+import { ImageService } from '../image/image.serv';
+import { NotFoundException } from '../../common/exceptions/not-found.exception';
+import { UpdatePostDto } from '../dto/UpdatePostDto';
 
 export class PostService {
 
   postRepository: PostRepository;
   userRepository: UserRepository;
   postRoomRepository: PostRoomRepository;
+  imageService: ImageService;
   imageRepository: ImageRepository;
   connection: Connection;
     
   constructor(
     postRepository, 
     userRepository, 
-    postRoomRepository, 
+    postRoomRepository,
+    imageService, 
     imageRepository, 
     connection
   ) {
     this.postRepository = postRepository;
     this.userRepository = userRepository;
     this.postRoomRepository = postRoomRepository;
+    this.imageService = imageService;
     this.imageRepository = imageRepository;
     this.connection = connection;
   }
@@ -107,12 +101,58 @@ export class PostService {
     return convertedPosts;
   }
 
-  // updatePost = async (updatePostDto: UpdatePostDto, postUid: number) => {
-  //   return this.postRepository.updatePostById(updatePostDto, postUid);
-  // }
+  updatePost = async (updatePostDto: UpdatePostDto, postUid: number) => {
+    const { title, description, location, max_head_count, isArchived } = updatePostDto;
 
-  deletePost = async (post: Post) => {
-    return this.postRepository.deletePostById(post);
+    const post = this.postRepository.getPostById(postUid);
+
+    if (!post) throw new NotFoundException('글이 존재하지 않습니다.');
+
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.getCustomRepository(PostRepository).updatePostById(
+        title, 
+        description, 
+        location, 
+        max_head_count, 
+        isArchived, 
+        postUid
+      );      
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new ServerException('서버 오류로 글 수정에 실패했습니다. 다시 시도해주세요');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  deletePost = async (userUid: string, postId: number) => {
+    const post = await this.postRepository.getPostById(postId);
+
+    if (!post) {
+      throw new NotFoundException('글이 존재하지 않습니다.');
+    }
+
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.getCustomRepository(PostRepository).deletePostById(post);      
+      await this.imageService.deletImagesInS3(post.images);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new ServerException('서버 오류로 글 삭제에 실패했습니다. 다시 시도해주세요');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
 }

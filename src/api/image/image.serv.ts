@@ -15,9 +15,6 @@ export class ImageService {
 
     deletImagesInS3 = async (images: Image[]) => {
         // const images = await this.imageRepository.getImagesByPostId(postId);
-        
-        console.log(images);
-        
         images.forEach(image => {
             deleteImage(image.key);
         });

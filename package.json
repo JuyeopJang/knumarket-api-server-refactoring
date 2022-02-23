@@ -46,6 +46,7 @@
     "mysql": "^2.18.1",
     "redis": "^4.0.1",
     "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.0.2",
     "typeorm": "^0.2.41",
     "uuid": "^8.3.2"
   },

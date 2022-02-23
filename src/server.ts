@@ -25,10 +25,10 @@ export async function startServer() {
   const imageRepository = getCustomRepository(ImageRepository, node_env);
   const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
 
-  const userService = new UserService(userRepository, connection);
-  const postService = new PostService(postRepository, userRepository, postRoomRepository, imageRepository, connection);
+  const userService = new UserService(userRepository, postRoomRepository, connection);
   const imageService = new ImageService(imageRepository);
-  const postRoomService = new PostRoomService(postRoomRepository, userRepository);
+  const postService = new PostService(postRepository, userRepository, postRoomRepository, imageService, imageRepository, connection);
+  const postRoomService = new PostRoomService(postRoomRepository, userRepository, connection);
 
   const app = new App([
     new UserController(userService),

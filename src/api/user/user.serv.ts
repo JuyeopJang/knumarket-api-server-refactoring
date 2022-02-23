@@ -8,14 +8,17 @@ import { jwtSign } from '../../lib/jwt';
 import { NotFoundException } from '../../common/exceptions/not-found.exception';
 import { insertUserDto } from '../dto/InsertUserDto';
 import { Connection } from 'typeorm';
+import { PostRoomRepository } from '../post_room/post-room.repo';
 
 export default class UserService {
 
   private userRepository: UserRepository;
+  private postRoomRepository: PostRoomRepository;
   private connection: Connection;
     
-  constructor(userRepository, connection) {
+  constructor(userRepository, postRoomRepository, connection) {
     this.userRepository = userRepository;
+    this.postRoomRepository = postRoomRepository;
     this.connection = connection;
   }
 
@@ -121,19 +124,26 @@ export default class UserService {
     const user = await this.userRepository.findUserById(userUid);
   
     if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
-
+    
     const queryRunner = this.connection.createQueryRunner();
     
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const myRooms = await queryRunner.manager.getCustomRepository(PostRoomRepository).findPostRoomsByUserId(userUid);
+
+      myRooms.forEach(async room => {
+        await queryRunner.manager.getCustomRepository(PostRoomRepository).updateCountOfRoom(room.post_room_uid, room.current_head_count - 1)
+        await queryRunner.manager.getCustomRepository(PostRoomRepository).deleteUserOutOfRoom(room.post_room_uid, userUid);
+      });
+
       await queryRunner.manager.getCustomRepository(UserRepository).deleteUser(userUid);
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
       
-      throw new ServerException('서버 오류로 닉네임 변경에 실패했습니다. 다시 시도해주세요');
+      throw new ServerException('서버 오류로 회원 탈퇴에 실패했습니다. 다시 시도해주세요');
     } finally {
       await queryRunner.release();
     }
@@ -159,5 +169,5 @@ export default class UserService {
     // if (refreshToken) return true;
     // return false;
   }
-
+  
 }

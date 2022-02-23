@@ -93,4 +93,11 @@ export class UserRepository extends Repository<User> {
       .where("user_uid = :userUid", { userUid })
       .execute();
   }
+
+  deletePostOfUser(userUid: string, postId: number) {
+    return this.createQueryBuilder()
+      .relation(User, "posts")
+      .of(userUid)
+      .remove(postId);   
+  }
 }
