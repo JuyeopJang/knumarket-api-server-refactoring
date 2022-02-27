@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 import { Post } from '../../entity/Post';
 
 @EntityRepository(Post)
@@ -20,10 +20,30 @@ export class PostRepository extends Repository<Post> {
     return this.createQueryBuilder('p')
       .select(['p.id', 'p.title', 'p.created_at', 'i.url'])
       .leftJoin('p.images', 'i')
-      .where('p.id > :id', { id: lastId })
-      .limit(20)
+      .where('p.id < :lastId', { lastId })
       .orderBy('p.id', 'DESC')
+      .limit(20)
       .getMany();
+  }
+
+  getPostsForFirstPage() {
+    return this.createQueryBuilder('p')
+      .select(['p.id', 'p.title', 'p.created_at', 'i.url'])
+      .leftJoin('p.images', 'i')
+      .orderBy('p.id', 'DESC')
+      .limit(20)
+      .getMany();
+  }
+  
+  getMyPostsForFirstPage = async (userUid: string) => {
+    return this.createQueryBuilder('p')
+      .select(['p.id', 'p.title', 'p.created_at', 'i.url'])
+      .leftJoin('p.images', 'i')
+      .innerJoin('p.user', 'u')
+      .andWhere('u.user_uid = :userUid', { userUid })
+      .orderBy('p.id', 'DESC')
+      .limit(20)
+      .getMany(); 
   }
 
   getMyPosts = async (lastId: number, userUid: string) => {
@@ -31,10 +51,10 @@ export class PostRepository extends Repository<Post> {
       .select(['p.id', 'p.title', 'p.created_at', 'i.url'])
       .leftJoin('p.images', 'i')
       .innerJoin('p.user', 'u')
-      .where('p.id > :id', { id: lastId })
+      .where('p.id < :lastId', { lastId })
       .andWhere('u.user_uid = :userUid', { userUid })
-      .limit(20)
       .orderBy('p.id', 'DESC')
+      .limit(20)
       .getMany(); 
   }
 

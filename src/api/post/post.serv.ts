@@ -85,16 +85,28 @@ export class PostService {
     });
   }
 
-  getPosts = async (lastId: number) => {
-    const posts = await this.postRepository.getPosts(lastId);
+  getPosts = async (lastId: number | null) => {
+    let posts;
+    
+    if (!lastId) {
+      posts = await this.postRepository.getPostsForFirstPage();
+    } else {
+      posts = await this.postRepository.getPosts(lastId);
+    }
     
     const convertedPosts = this.convertPostHaveOneImage(posts);
   
     return convertedPosts;
   }
 
-  getMyPosts = async (lastId: number, userUid: string) => {
-    const myPosts = await this.postRepository.getMyPosts(lastId, userUid); 
+  getMyPosts = async (lastId: number | null, userUid: string) => {
+    let myPosts;
+
+    if (!myPosts) {
+      myPosts = await this.postRepository.getMyPostsForFirstPage(userUid);
+    } else {
+      myPosts = await this.postRepository.getMyPosts(lastId, userUid);
+    } 
   
     const convertedPosts = this.convertPostHaveOneImage(myPosts);
 

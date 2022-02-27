@@ -18,25 +18,6 @@ export class PostRoomService {
         this.connection = connection;
     }
 
-    getPostRoom = async (addPostRoomDto: AddPostRoomDto, userUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
-
-        if (!user) {
-            throw new NotFoundException('존재하지 않는 회원입니다.');
-        }
-    
-        const postRoom = this.postRoomRepository.create();
-        postRoom.title = addPostRoomDto.title;
-        postRoom.max_head_count = addPostRoomDto.max_head_count;
-        
-
-        if (!postRoom) {
-            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
-        }
-
-        return await this.postRoomRepository.save(postRoom);
-    }
-
     participateUserInRoom = async (userUid: string, roomUid: string) => {
 
         const user = await this.userRepository.findUserById(userUid);
@@ -104,7 +85,7 @@ export class PostRoomService {
         } catch (err) {
             await queryRunner.rollbackTransaction();
       
-            throw new ServerException('서버 오류로 채팅방 참여에 실패했습니다. 다시 시도해주세요');
+            throw new ServerException('서버 오류로 채팅방에서 나가기에 실패했습니다.');
         } finally {
             await queryRunner.release();
         }

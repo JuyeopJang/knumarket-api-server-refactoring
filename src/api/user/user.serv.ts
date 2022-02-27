@@ -13,12 +13,10 @@ import { PostRoomRepository } from '../post_room/post-room.repo';
 export default class UserService {
 
   private userRepository: UserRepository;
-  private postRoomRepository: PostRoomRepository;
   private connection: Connection;
     
-  constructor(userRepository, postRoomRepository, connection) {
+  constructor(userRepository, connection) {
     this.userRepository = userRepository;
-    this.postRoomRepository = postRoomRepository;
     this.connection = connection;
   }
 
@@ -28,14 +26,10 @@ export default class UserService {
       .update(password)
       .digest('hex');
   }
-    
-  async countByEmail(email: string) {
-    return this.userRepository.countByEmail(email);
-  }
 
   async signUp(insertUserDto: insertUserDto) {
     const { email, password, nickname } = insertUserDto;
-    const hasEmail: number = +await this.countByEmail(email);
+    const hasEmail: number = await this.userRepository.countByEmail(email);
 
     if (hasEmail) {
       throw new ConflictException('이미 존재하는 이메일입니다.');
@@ -80,13 +74,13 @@ export default class UserService {
     return tokens;
   }
 
-  getUser = async (userUid: string) => {
-    const user = await this.userRepository.findUserById(userUid);
+  // getUser = async (userUid: string) => {
+  //   const user = await this.userRepository.findUserById(userUid);
 
-    if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
+  //   if (!user) throw new NotFoundException('회원 정보가 존재하지 않습니다.');
 
-    return user;
-  }
+  //   return user;
+  // }
 
   setRefreshToken = (userUid: string, refreshToken: string) => {
     // setRefreshToken(userUid, refreshToken);

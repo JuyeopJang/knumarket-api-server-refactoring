@@ -73,13 +73,19 @@ export default class PostController implements ApiController {
 
     showPosts = async (req: Request, res: Response, next: NextFunction) => {
         const { last_id } = req.query;
-        const posts = await this.postService.getPosts(Number(last_id));
+        let posts;
+
+        if (last_id !== 'null') {
+            posts = await this.postService.getPosts(Number(last_id));    
+        } else {
+            posts = await this.postService.getPosts(null);
+        }
 
         return {
             statusCode: 200,
             response: {
                 posts,
-                nextLastId: posts.length < 20 ? 0 : posts[posts.length - 1].id
+                nextLastId: posts.length < 20 || posts[posts.length - 1].id === 1 ? null : posts[posts.length - 1].id
             }
         };
     }
@@ -97,13 +103,20 @@ export default class PostController implements ApiController {
     showMyPosts = async (req: Request, res: Response, next: NextFunction) => {
         const { last_id } = req.query;
         const { userUid } = res.locals;
-        const myPosts = await this.postService.getMyPosts(Number(last_id), userUid);
+
+        let myPosts;
+
+        if (last_id !== 'null') {
+            myPosts = await this.postService.getMyPosts(Number(last_id), userUid);    
+        } else {
+            myPosts = await this.postService.getMyPosts(null, userUid);
+        }
         
         return {
             statusCode: 200,
             response: {
                 posts: myPosts,
-                nextLastId: myPosts.length < 20 ? 0 : myPosts[myPosts.length - 1].id,
+                nextLastId: myPosts.length < 20 || myPosts[myPosts.length - 1].id === 1 ? null : myPosts[myPosts.length - 1].id,
             }
         };
     }
