@@ -1,5 +1,3 @@
-import { PostRoom } from "../../entity/PostRoom";
-import { User } from "../../entity/User";
 import { AddImageDto } from "./AddImageDto";
 
 export class AddPostDto {

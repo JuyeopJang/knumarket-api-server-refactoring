@@ -1,4 +1,4 @@
 export class AddImageDto {
-    key: string;
-    url: string;
+  key: string;
+  url: string;
 }

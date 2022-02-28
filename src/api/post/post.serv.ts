@@ -102,7 +102,7 @@ export class PostService {
   getMyPosts = async (lastId: number | null, userUid: string) => {
     let myPosts;
 
-    if (!myPosts) {
+    if (!lastId) {
       myPosts = await this.postRepository.getMyPostsForFirstPage(userUid);
     } else {
       myPosts = await this.postRepository.getMyPosts(lastId, userUid);
@@ -116,7 +116,7 @@ export class PostService {
   updatePost = async (updatePostDto: UpdatePostDto, postUid: number) => {
     const { title, description, location, max_head_count, isArchived } = updatePostDto;
 
-    const post = this.postRepository.getPostById(postUid);
+    const post = await this.postRepository.getPostById(postUid);
 
     if (!post) throw new NotFoundException('글이 존재하지 않습니다.');
 
