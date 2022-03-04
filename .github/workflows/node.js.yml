@@ -48,8 +48,8 @@ jobs:
       with:
         redis-version: ${{ matrix.redis-version }}
 
-    - run: npm cache clean --force
-    - run: rm -rf node_modules && rm ./package-lock.json
+    # - run: npm cache clean --force
+    # - run: rm -rf node_modules && rm ./package-lock.json
     - run: npm install
     - run: npm run test
 
