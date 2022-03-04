@@ -12,21 +12,24 @@ import { PostRoomRepository } from './api/post_room/post-room.repo';
 import PostRoomController from './api/post_room/post-room.con';
 import ImageController from './api/image/image.con';
 import App from './app';
-import { getCustomRepository } from 'typeorm';
+import { getConnection, getCustomRepository } from 'typeorm';
 import { node_env } from './config';
+import { initializaUserDatas } from './lib/seed';
 
 export async function startServer() {
   await initializeDatabase();
+
+  const connection = getConnection(node_env);
 
   const userRepository = getCustomRepository(UserRepository, node_env);
   const postRepository = getCustomRepository(PostRepository, node_env);
   const imageRepository = getCustomRepository(ImageRepository, node_env);
   const postRoomRepository = getCustomRepository(PostRoomRepository, node_env);
 
-  const userService = new UserService(userRepository);
-  const postService = new PostService(postRepository, userRepository);
+  const userService = new UserService(userRepository, connection);
   const imageService = new ImageService(imageRepository);
-  const postRoomService = new PostRoomService(postRoomRepository, userRepository);
+  const postService = new PostService(postRepository, userRepository, postRoomRepository, imageService, imageRepository, connection);
+  const postRoomService = new PostRoomService(postRoomRepository, userRepository, connection);
 
   const app = new App([
     new UserController(userService),
@@ -34,6 +37,8 @@ export async function startServer() {
     new PostRoomController(postRoomService),
     new ImageController(imageService)
   ]);
+
+  await initializaUserDatas(userRepository, postRepository);
 
   const server = app.listen();
 

@@ -1,6 +1,7 @@
-import { getManager, Transaction, TransactionManager } from "typeorm";
+import { Connection } from "typeorm";
+import { ServerException } from "../../common/exceptions";
+import { ConflictException } from "../../common/exceptions/conflict.exception";
 import { NotFoundException } from "../../common/exceptions/not-found.exception";
-import { node_env } from "../../config";
 import { AddPostRoomDto } from "../dto/AddPostRoomDto";
 import { UserRepository } from "../user/user.repo";
 import { PostRoomRepository } from "./post-room.repo";
@@ -9,83 +10,88 @@ export class PostRoomService {
 
     postRoomRepository: PostRoomRepository;
     userRepository: UserRepository;
+    connection: Connection;
 
-    constructor(postRoomRepository: PostRoomRepository, userRepository: UserRepository) {
+    constructor(postRoomRepository, userRepository, connection) {
         this.postRoomRepository = postRoomRepository;
         this.userRepository = userRepository;
-    }
-
-    getPostRoom = async (addPostRoomDto: AddPostRoomDto, userUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
-
-        if (!user) {
-            throw new NotFoundException('존재하지 않는 회원입니다.');
-        }
-    
-        const postRoom = this.postRoomRepository.create();
-        postRoom.title = addPostRoomDto.title;
-        postRoom.max_head_count = addPostRoomDto.max_head_count;
-        
-
-        if (!postRoom) {
-            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
-        }
-
-        return await this.postRoomRepository.save(postRoom);
+        this.connection = connection;
     }
 
     participateUserInRoom = async (userUid: string, roomUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
+
+        const user = await this.userRepository.findUserById(userUid);
 
         if (!user) {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
-        const postRoom = await this.postRoomRepository.findOne(roomUid, {
-            relations: ['users']
-        });
-    
-        if (!postRoom) {
-            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
+        const room = await this.postRoomRepository.findRoomById(roomUid);
+
+        if (!room) {
+            throw new NotFoundException('존재하지 않는 채팅방입니다.');
         }
 
-        postRoom.users.push(user);
+        const { post_room_uid } = await this.postRoomRepository.findRoomByUserIdAndRoomId(userUid, roomUid);
 
-        await this.postRoomRepository.save(postRoom);
+        if (post_room_uid === roomUid) throw new ConflictException('이미 채팅방에 존재하는 회원입니다.');
+
+        if (room.current_head_count >= room.max_head_count) {
+            throw new ConflictException('인원이 꽉 차서 채팅방에 입장 불가합니다.');
+        }
+
+        const queryRunner = this.connection.createQueryRunner();
+
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.getCustomRepository(UserRepository).relateRoomOfUser(userUid, roomUid);
+            await queryRunner.manager.getCustomRepository(PostRoomRepository).updateCountOfRoom(roomUid, room.current_head_count + 1);
+
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+      
+            throw new ServerException('서버 오류로 채팅방 참여에 실패했습니다. 다시 시도해주세요');
+        } finally {
+            await queryRunner.release();
+        }
     }
 
-    deleteUserInRoom = async (userUid: any, roomUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
+    deleteUserInRoom = async (userUid: string, roomUid: string) => {
+        const user = await this.userRepository.findUserById(userUid);
 
         if (!user) {
             throw new NotFoundException('존재하지 않는 회원입니다.');
         }
 
-        const postRoom = await this.postRoomRepository.findOne(roomUid, {
-            relations: ['users']
-        });
-    
-        if (!postRoom) {
-            throw new NotFoundException('존재하지 않는 채팅 방입니다.');
+        const room = await this.postRoomRepository.findRoomById(roomUid);
+
+        if (!room) {
+            throw new NotFoundException('존재하지 않는 채팅방입니다.');
         }
 
-        // console.log(postRoom);
+        const queryRunner = this.connection.createQueryRunner();
 
-        postRoom.users = postRoom.users.filter((user) => {
-            return user.user_uid !== userUid;
-        });
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-        await this.postRoomRepository.save(postRoom);
-    }
+        try {
+            await queryRunner.manager.getCustomRepository(PostRoomRepository).deleteUserOutOfRoom(roomUid, userUid);
+            await queryRunner.manager.getCustomRepository(PostRoomRepository).updateCountOfRoom(roomUid, room.current_head_count - 1);
 
-    getMyRooms = async (userUid: string) => {
-        const user = await this.userRepository.findOne(userUid);
-        console.log(user);
-
-        if (!user) {
-            throw new NotFoundException('존재하지 않는 회원입니다.');
+            await queryRunner.commitTransaction();
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+      
+            throw new ServerException('서버 오류로 채팅방에서 나가기에 실패했습니다.');
+        } finally {
+            await queryRunner.release();
         }
-
-        return user.post_rooms;
     }
+
+  async getMyRooms(userUid: string) {
+    return await this.postRoomRepository.findPostRoomsByUserId(userUid);
+  }
 }

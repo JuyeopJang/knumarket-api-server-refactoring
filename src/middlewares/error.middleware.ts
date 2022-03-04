@@ -11,7 +11,7 @@ export const errorMiddleware = (err: HttpException, req: Request, res: Response,
                 message: err.message,
                 params: err.errors !== null ? err.errors : null
             }
-        })
+        });
     } else {
         next();
     }

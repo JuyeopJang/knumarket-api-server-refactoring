@@ -1,11 +1,11 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 import bodyParser from 'body-parser';
-// import csurf from 'csurf';
 import helmet from 'helmet';
 import ApiController from './api/interfaces/ApiController';
 import morgan from 'morgan';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { Express } from 'express-serve-static-core';
+import { initializaUserDatas } from './lib/seed';
 
 class App {
     private app: Express;
@@ -46,6 +46,9 @@ class App {
 
         this.app.use('/api', router);
     }
+
+    // initializaSeedDatas() {
+    // }
 
     listen() {
         const port: number = Number(process.env.PORT) || 5000;

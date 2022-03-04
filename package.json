@@ -46,6 +46,7 @@
     "mysql": "^2.18.1",
     "redis": "^4.0.1",
     "reflect-metadata": "^0.1.13",
+    "sqlite3": "^5.0.2",
     "typeorm": "^0.2.41",
     "uuid": "^8.3.2"
   },
@@ -56,6 +57,7 @@
     "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
     "jest": "^27.4.7",
+    "jest-mock-extended": "^2.0.4",
     "nodemon": "^2.0.15",
     "supertest": "^6.1.6",
     "ts-jest": "^27.1.2",

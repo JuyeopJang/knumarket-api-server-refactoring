@@ -6,18 +6,18 @@ module.exports = [
     "type": "mysql",
     "replication": {
       "master": {
-        "host": db_host,
-        "port": db_port,
-        "username": db_user,
-        "password": db_password,
-        "database": db
+        "host": "localhost",
+        "port": "3306",
+        "username": "root",
+        "password": "cr7!cr7!",
+        "database": "knumarket_auth"
       },
       "slaves": [{
-        "host": db_host,
-        "port": db_port,
-        "username": db_user,
-        "password": db_password,
-        "database": db
+        "host": "localhost",
+        "port": "3306",
+        "username": "root",
+        "password": "cr7!cr7!",
+        "database": "knumarket_auth"
       }]
     },
     "synchronize": true,
@@ -50,6 +50,4 @@ module.exports = [
     },
     "synchronize": false,
     "entities": ["src/entity/**/*.ts"]
-  }
-]
-;
+  }];

@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, AfterInsert} from "typeorm";
 import { User } from "./User";
 
 @Entity()
@@ -18,9 +18,7 @@ export class PostRoom {
     })
     current_head_count: number;
 
-    @ManyToMany(() => User, user => user.post_rooms, {
-        cascade: ["insert", "remove", "update"]
-    })
+    @ManyToMany(() => User, user => user.post_rooms)
     @JoinTable()
     users: User[]
 

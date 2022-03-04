@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { decode } from "jsonwebtoken";
 import { BadRequestException, UnauthorizedException } from "../common/exceptions";
 import { jwtVerify } from "../lib/jwt";
 
