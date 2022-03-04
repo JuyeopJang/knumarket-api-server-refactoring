@@ -48,6 +48,12 @@ module.exports = [
         "database": db
       }]
     },
-    "synchronize": false,
-    "entities": ["src/entity/**/*.ts"]
+    "synchronize": true,
+    "entities": ["src/entity/**/*.ts"],
+    "dropSchema": true,
+    "logging": ["error"],
+    "maxQueryExecutionTime": 1000,
+    "extra": {
+      "connectionLimit": 500
+    }
   }];
