@@ -71,7 +71,7 @@ export default class PostController implements ApiController {
         };
     }
 
-    async showPosts(req: Request, res: Response, next: NextFunction) {
+    showPosts = async (req: Request, res: Response, next: NextFunction) => {
         const { last_id } = req.query;
         const [posts, nextLastId] = await this.postService.getPosts(String(last_id));
 
