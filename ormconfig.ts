@@ -24,7 +24,7 @@ module.exports = [
     "entities": ["src/entity/**/*.ts"],
     "logging": true,
     "maxQueryExecutionTime": 1000,
-    // "dropSchema": true
+    "dropSchema": true
   },
   {
     "name": "production",

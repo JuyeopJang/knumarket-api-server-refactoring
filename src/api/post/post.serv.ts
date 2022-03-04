@@ -85,18 +85,22 @@ export class PostService {
     });
   }
 
-  getPosts = async (lastId: number | null) => {
+  async getPosts(lastId: string) {
     let posts;
-    
-    if (!lastId) {
-      posts = await this.postRepository.getPostsForFirstPage();
+
+    if (lastId !== 'null') {
+      posts = await this.postRepository.getPosts(Number(lastId));    
     } else {
-      posts = await this.postRepository.getPosts(lastId);
+      posts = await this.postRepository.getPostsForFirstPage();
     }
     
     const convertedPosts = this.convertPostHaveOneImage(posts);
-  
-    return convertedPosts;
+
+    if (convertedPosts.length < 20) {
+      return [convertedPosts, null];
+    } else {
+      return [convertedPosts, convertedPosts[convertedPosts.length - 1].id];
+    }
   }
 
   getMyPosts = async (lastId: number | null, userUid: string) => {

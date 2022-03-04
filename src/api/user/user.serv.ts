@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import { UserRepository } from './user.repo';
 import { ConflictException } from '../../common/exceptions/conflict.exception';
 import { jwtSign } from '../../lib/jwt';
-// import { getRefreshToken, setRefreshToken } from '../../lib/redis';
 import { NotFoundException } from '../../common/exceptions/not-found.exception';
 import { insertUserDto } from '../dto/InsertUserDto';
 import { Connection } from 'typeorm';

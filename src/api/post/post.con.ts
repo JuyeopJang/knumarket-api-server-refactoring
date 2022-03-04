@@ -71,21 +71,15 @@ export default class PostController implements ApiController {
         };
     }
 
-    showPosts = async (req: Request, res: Response, next: NextFunction) => {
+    async showPosts(req: Request, res: Response, next: NextFunction) {
         const { last_id } = req.query;
-        let posts;
-
-        if (last_id !== 'null') {
-            posts = await this.postService.getPosts(Number(last_id));    
-        } else {
-            posts = await this.postService.getPosts(null);
-        }
+        const [posts, nextLastId] = await this.postService.getPosts(String(last_id));
 
         return {
             statusCode: 200,
             response: {
                 posts,
-                nextLastId: posts.length < 20 || posts[posts.length - 1].id === 1 ? null : posts[posts.length - 1].id
+                nextLastId
             }
         };
     }

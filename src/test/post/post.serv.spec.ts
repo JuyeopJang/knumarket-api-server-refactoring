@@ -413,7 +413,7 @@ describe('PostService - post.serv.ts', () => {
   describe('getPosts - 공동구매 글 조회', () => {
     it('성공 - lastId가 null인 경우 첫 번째 페이지의 글 조회', async () => {
       // given
-      const lastId = null;
+      const lastId = 'null';
 
       // when
       postRepository.getPostsForFirstPage.mockResolvedValue([]);
@@ -424,7 +424,7 @@ describe('PostService - post.serv.ts', () => {
     });
 
     it('성공 - lastId가 number인 경우 lastId보다 작은 수부터 20개 조회', async () => {
-        const lastId = 22;
+        const lastId = '22';
 
         // when
         postRepository.getPosts.mockResolvedValue([]);
