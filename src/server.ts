@@ -38,7 +38,7 @@ export async function startServer() {
     new ImageController(imageService)
   ]);
 
-  await initializaUserDatas(userRepository, postRepository);
+  await initializaUserDatas(userRepository, postRepository, postRoomRepository);
 
   const server = app.listen();
 
