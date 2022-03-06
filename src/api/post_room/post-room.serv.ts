@@ -32,9 +32,9 @@ export class PostRoomService {
             throw new NotFoundException('존재하지 않는 채팅방입니다.');
         }
 
-        const { post_room_uid } = await this.postRoomRepository.findRoomByUserIdAndRoomId(userUid, roomUid);
+        const isUserExistInRoom = await this.postRoomRepository.findRoomByUserIdAndRoomId(userUid, roomUid);
 
-        if (post_room_uid === roomUid) throw new ConflictException('이미 채팅방에 존재하는 회원입니다.');
+        if (isUserExistInRoom && isUserExistInRoom.post_room_uid === roomUid) throw new ConflictException('이미 채팅방에 존재하는 회원입니다.');
 
         if (room.current_head_count >= room.max_head_count) {
             throw new ConflictException('인원이 꽉 차서 채팅방에 입장 불가합니다.');
