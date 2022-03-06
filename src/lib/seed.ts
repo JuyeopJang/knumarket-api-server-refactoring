@@ -21,7 +21,7 @@ export const initializaUserDatas = async (userRepository, postRepository, roomRe
     const userUid = uuidv4();
     const password = crypto
       .createHmac('sha512', process.env.CRYPTO || '')
-      .update('123456')
+      .update('helloworld')
       .digest('hex');
     const email = `noah${i}@gmail.com`;
     const nickname = `mockUser${i}`;
