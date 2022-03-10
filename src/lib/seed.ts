@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
 export const initializaPostAndRoomDatas = async (userRepository, postRepository, roomRepository, userUid: string) => {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 4; i++) {
     const post = await postRepository.insertPost('피자 같이 시킬사람?', '장소는 쪽문 또는 정문~~', 3, 10);
     const postId = post.identifiers[0].id;
     await userRepository.relatePostOfUser(userUid, postId);
