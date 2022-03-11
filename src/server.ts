@@ -14,7 +14,7 @@ import ImageController from './api/image/image.con';
 import App from './app';
 import { getConnection, getCustomRepository } from 'typeorm';
 import { node_env } from './config';
-import { initializaUserDatas } from './lib/seed';
+// import { initializaUserDatas } from './lib/seed';
 
 export async function startServer() {
   await initializeDatabase();
@@ -38,7 +38,7 @@ export async function startServer() {
     new ImageController(imageService)
   ]);
 
-  await initializaUserDatas(userRepository, postRepository, postRoomRepository);
+  // await initializaUserDatas(userRepository, postRepository, postRoomRepository);
 
   const server = app.listen();
 
