@@ -6,3 +6,5 @@ node_modules
 ormconfig.json
 
 coverage
+
+seed.sql

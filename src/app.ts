@@ -5,7 +5,6 @@ import ApiController from './api/interfaces/ApiController';
 import morgan from 'morgan';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { Express } from 'express-serve-static-core';
-import { initializaUserDatas } from './lib/seed';
 
 class App {
     private app: Express;
