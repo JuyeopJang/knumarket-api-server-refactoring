@@ -19,6 +19,8 @@ knumarket 이란 경북대학교의 영어 약자인 knu와 market의 합성어�
 ### 3. CI/CD
 - [Github Actions & AWS Elastic Beanstalk (1)](https://velog.io/@zooyeop/Github-Actions-CICD-1)
 - [Github Actions & AWS Elastic Beanstalk (2)](https://velog.io/@zooyeop/CICD-Github-Actions-AWS-Elastic-Beanstalk-2)
+### 4. Performance
+- [Stress Test & Load Balancing](https://velog.io/@zooyeop/Performance-Stress-Test-Load-Balancing)
 
 ## 코드 단위의 고려 사항
 - Typescript를 활용하여 객체 지향적인 코드를 통해 최대한 중복 코드를 피한다.
